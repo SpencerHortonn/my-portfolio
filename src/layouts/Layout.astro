@@ -43,8 +43,8 @@ const {
         <feTurbulence
           id="grain-turb"
           type="fractalNoise"
-          baseFrequency="0.65"
-          numOctaves="3"
+          baseFrequency="0.72"
+          numOctaves="4"
           stitchTiles="stitch"
           seed="1"
         />
@@ -101,7 +101,11 @@ const {
   <style is:global>
     html { scroll-behavior: smooth; }
 
-    /* ── Film grain ── */
+    /* ── Film grain ──
+       multiply on a light bg is essential: overlay blends to near-invisible
+       on white/off-white because the math cancels out. multiply lets the
+       dark parts of the noise pattern show through as visible texture.
+       opacity 0.22 = clearly present without being a distraction.        */
     .grain-wrap {
       position: fixed;
       top: -100%;
@@ -110,11 +114,14 @@ const {
       height: 300%;
       pointer-events: none;
       z-index: 40;
-      opacity: 0.12;
-      mix-blend-mode: overlay;
+      opacity: 0.22;
+      mix-blend-mode: multiply;
       will-change: transform;
     }
     .grain-svg { width: 100%; height: 100%; display: block; }
+
+    /* Lightbox images bypass the global fade-in — they're injected dynamically */
+    #lightbox img { opacity: 1 !important; transition: none !important; filter: none !important; }
 
     /* ── Unified image color grade ──
        Pulls all images toward the same "roll" — slightly desaturated,

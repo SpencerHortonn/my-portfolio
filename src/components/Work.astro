@@ -2,24 +2,17 @@
 import { workItems } from '../config/content';
 ---
 
-<!-- Work grid section -->
 <section id="work" class="py-24 md:py-40 bg-f-cream">
   <div class="max-w-6xl mx-auto px-6">
 
     <div class="mb-14 reveal">
-      <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-blue mb-4">
-        The Work
-      </p>
+      <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-blue mb-4">The Work</p>
       <h2 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight">
         Films, photos,<br />
         and moments worth keeping.
       </h2>
     </div>
 
-    <!--
-      CSS columns gives a natural masonry layout for mixed portrait/landscape.
-      Each item breaks inside avoided so it never splits across columns.
-    -->
     <div class="columns-2 md:columns-3 gap-3 md:gap-4">
       {workItems.map((item, i) => (
         <button
@@ -28,7 +21,6 @@ import { workItems } from '../config/content';
           data-item={JSON.stringify(item)}
           aria-label={`View: ${item.title}`}
         >
-          <!-- Thumbnail -->
           <div class={`relative overflow-hidden ${item.orientation === 'portrait' ? 'aspect-[2/3]' : 'aspect-video'}`}>
             <img
               src={item.thumbnail}
@@ -37,9 +29,9 @@ import { workItems } from '../config/content';
               loading="lazy"
             />
 
-            <!-- Hover overlay -->
+            <!-- Hover overlay with type-appropriate icon -->
             <div
-              class="absolute inset-0 bg-f-ink/0 group-hover:bg-f-ink/25 transition-colors duration-300 flex items-center justify-center"
+              class="absolute inset-0 bg-f-ink/0 group-hover:bg-f-ink/28 transition-colors duration-300 flex items-center justify-center"
               aria-hidden="true"
             >
               {item.type === 'video' ? (
@@ -47,6 +39,15 @@ import { workItems } from '../config/content';
                   <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
                     <circle cx="24" cy="24" r="23" stroke="white" stroke-width="1.5"/>
                     <polygon points="20,16 36,24 20,32" fill="white"/>
+                  </svg>
+                </div>
+              ) : item.type === 'gallery' ? (
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center gap-2">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="11" height="11" rx="1"/>
+                    <rect x="18" y="3" width="11" height="11" rx="1"/>
+                    <rect x="3" y="18" width="11" height="11" rx="1"/>
+                    <rect x="18" y="18" width="11" height="11" rx="1"/>
                   </svg>
                 </div>
               ) : (
@@ -59,14 +60,13 @@ import { workItems } from '../config/content';
             </div>
 
             <!-- Type badge -->
-            {item.type === 'video' && (
-              <div class="absolute top-3 left-3 bg-f-white/90 px-2 py-1" aria-hidden="true">
-                <span class="font-sans text-[10px] tracking-[0.12em] uppercase text-f-ink">Film</span>
-              </div>
-            )}
+            <div class="absolute top-3 left-3 bg-f-white/90 px-2 py-1" aria-hidden="true">
+              <span class="font-sans text-[10px] tracking-[0.12em] uppercase text-f-ink">
+                {item.type === 'video' ? 'Film' : item.type === 'gallery' ? 'Photos' : 'Photo'}
+              </span>
+            </div>
           </div>
 
-          <!-- Caption row -->
           <div class="p-3 md:p-4">
             <p class="font-serif text-sm md:text-base text-f-ink mb-0.5">{item.title}</p>
             <p class="font-sans text-xs text-f-gray">{item.caption}</p>
@@ -78,10 +78,10 @@ import { workItems } from '../config/content';
   </div>
 </section>
 
-<!-- ── Lightbox modal ── -->
+<!-- ── Lightbox ── -->
 <div
   id="lightbox"
-  class="fixed inset-0 z-[100] hidden items-center justify-center bg-f-ink/90 backdrop-blur-sm"
+  class="fixed inset-0 z-[100] hidden items-center justify-center bg-f-ink/92 backdrop-blur-sm"
   role="dialog"
   aria-modal="true"
   aria-label="Media lightbox"
@@ -91,7 +91,7 @@ import { workItems } from '../config/content';
     <!-- Close -->
     <button
       id="lightbox-close"
-      class="absolute -top-12 right-0 text-f-white/60 hover:text-f-white transition-colors"
+      class="absolute -top-12 right-0 text-f-white/60 hover:text-f-white transition-colors z-10"
       aria-label="Close lightbox"
       type="button"
     >
@@ -101,37 +101,125 @@ import { workItems } from '../config/content';
       </svg>
     </button>
 
-    <!-- Dynamic content injected by JS -->
+    <!-- Gallery prev/next — shown only for gallery type -->
+    <button
+      id="gallery-prev"
+      class="hidden absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 text-f-white/60 hover:text-f-white transition-colors z-10 p-2"
+      aria-label="Previous image"
+      type="button"
+    >
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <polyline points="18,4 8,14 18,24"/>
+      </svg>
+    </button>
+    <button
+      id="gallery-next"
+      class="hidden absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 text-f-white/60 hover:text-f-white transition-colors z-10 p-2"
+      aria-label="Next image"
+      type="button"
+    >
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <polyline points="10,4 20,14 10,24"/>
+      </svg>
+    </button>
+
+    <!-- Dynamic content -->
     <div id="lightbox-content"></div>
 
-    <!-- Footer row -->
+    <!-- Footer: title + caption + gallery counter -->
     <div class="mt-4 flex items-baseline justify-between gap-4">
       <p id="lightbox-title"   class="font-serif text-f-white text-lg font-light"></p>
-      <p id="lightbox-caption" class="font-sans text-f-white/50 text-xs shrink-0"></p>
+      <div class="flex items-center gap-4 shrink-0">
+        <p id="lightbox-counter" class="hidden font-sans text-f-white/40 text-xs"></p>
+        <p id="lightbox-caption" class="font-sans text-f-white/50 text-xs"></p>
+      </div>
     </div>
 
   </div>
 </div>
 
 <script>
+  // ── State ──
+  let galleryImages: string[] = [];
+  let galleryIndex  = 0;
+  let galleryTitle  = '';
+
   const lightbox        = document.getElementById('lightbox')!;
   const lightboxContent = document.getElementById('lightbox-content')!;
   const lightboxTitle   = document.getElementById('lightbox-title')!;
   const lightboxCaption = document.getElementById('lightbox-caption')!;
+  const lightboxCounter = document.getElementById('lightbox-counter')!;
   const closeBtn        = document.getElementById('lightbox-close')!;
+  const prevBtn         = document.getElementById('gallery-prev')!;
+  const nextBtn         = document.getElementById('gallery-next')!;
 
+  // ── Open / close ──
   function openLightbox(item: Record<string, any>) {
     lightboxTitle.textContent   = item.title;
     lightboxCaption.textContent = item.caption;
+    prevBtn.classList.add('hidden');
+    nextBtn.classList.add('hidden');
+    lightboxCounter.classList.add('hidden');
 
-    if (item.type === 'photo') {
+    if (item.type === 'gallery' && Array.isArray(item.images) && item.images.length > 0) {
+      galleryImages = item.images;
+      galleryTitle  = item.title;
+      galleryIndex  = 0;
+      prevBtn.classList.remove('hidden');
+      nextBtn.classList.remove('hidden');
+      lightboxCounter.classList.remove('hidden');
+      renderGalleryImage();
+    } else if (item.type === 'video') {
+      renderVideo(item);
+    } else {
+      // Single photo
       lightboxContent.innerHTML = `
         <img
           src="${item.fullUrl || item.thumbnail}"
           alt="${item.title}"
           class="w-full max-h-[80vh] object-contain"
         />`;
-    } else if (item.type === 'video' && item.embedUrl) {
+    }
+
+    lightbox.classList.remove('hidden');
+    lightbox.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.add('hidden');
+    lightbox.classList.remove('flex');
+    // Pause any playing video before clearing
+    const vid = lightboxContent.querySelector('video');
+    if (vid) vid.pause();
+    lightboxContent.innerHTML = '';
+    document.body.style.overflow = '';
+  }
+
+  // ── Gallery slideshow ──
+  function renderGalleryImage() {
+    const src = galleryImages[galleryIndex];
+    lightboxContent.innerHTML = `
+      <div class="relative">
+        <img
+          src="${src}"
+          alt="${galleryTitle} — frame ${galleryIndex + 1}"
+          class="w-full max-h-[78vh] object-contain"
+          style="opacity:1;filter:contrast(0.91) saturate(0.82) sepia(0.08) brightness(0.97);"
+        />
+      </div>`;
+    lightboxCounter.textContent = `${galleryIndex + 1} / ${galleryImages.length}`;
+  }
+
+  function stepGallery(dir: 1 | -1) {
+    galleryIndex = (galleryIndex + dir + galleryImages.length) % galleryImages.length;
+    renderGalleryImage();
+  }
+
+  // ── Video ──
+  function renderVideo(item: Record<string, any>) {
+    if (item.embedUrl) {
+      // YouTube / Vimeo embed
       lightboxContent.innerHTML = `
         <div class="aspect-video w-full">
           <iframe
@@ -143,48 +231,61 @@ import { workItems } from '../config/content';
             title="${item.title}"
           ></iframe>
         </div>`;
+    } else if (item.videoFile) {
+      // Local file — plays on localhost, too large for Vercel static deploy
+      lightboxContent.innerHTML = `
+        <div class="aspect-video w-full bg-black flex items-center justify-center">
+          <video
+            controls
+            preload="metadata"
+            class="w-full h-full max-h-[80vh]"
+            style="opacity:1;"
+          >
+            <source src="${item.videoFile}" type="video/quicktime" />
+            <source src="${item.videoFile}" type="video/mp4" />
+            <p class="text-white/60 text-sm font-sans p-8">
+              Your browser doesn't support this video format.
+              Upload to YouTube/Vimeo for cross-browser playback.
+            </p>
+          </video>
+        </div>`;
     } else {
-      // Video placeholder — no embed URL yet
+      // Placeholder — no file yet
       lightboxContent.innerHTML = `
         <div class="aspect-video w-full relative overflow-hidden flex flex-col items-center justify-center gap-4">
           <img
             src="${item.thumbnail}"
             alt="${item.title}"
-            class="absolute inset-0 w-full h-full object-cover opacity-25"
+            class="absolute inset-0 w-full h-full object-cover"
+            style="opacity:0.2;filter:none;"
           />
           <div class="relative text-center px-6">
             <p class="font-serif text-white text-2xl mb-2">${item.title}</p>
             <p class="font-sans text-white/50 text-sm">
-              Video coming soon — catch it @spencerchicken on TikTok or YouTube.
+              Coming soon — @spencerchicken on TikTok & YouTube
             </p>
           </div>
         </div>`;
     }
-
-    lightbox.classList.remove('hidden');
-    lightbox.classList.add('flex');
-    document.body.style.overflow = 'hidden';
   }
 
-  function closeLightbox() {
-    lightbox.classList.add('hidden');
-    lightbox.classList.remove('flex');
-    lightboxContent.innerHTML = '';
-    document.body.style.overflow = '';
-  }
-
-  // Attach to each grid button
+  // ── Event listeners ──
   document.querySelectorAll<HTMLElement>('.work-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      try {
-        const item = JSON.parse(btn.dataset.item || '{}');
-        openLightbox(item);
-      } catch (_) {}
+      try { openLightbox(JSON.parse(btn.dataset.item || '{}')); } catch (_) {}
     });
   });
 
-  // Close handlers
-  lightbox.addEventListener('click',   e => { if (e.target === lightbox) closeLightbox(); });
-  closeBtn.addEventListener('click',   closeLightbox);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  prevBtn.addEventListener('click', () => stepGallery(-1));
+  nextBtn.addEventListener('click', () => stepGallery(1));
+
+  // Keyboard: ESC closes, left/right arrows navigate gallery
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape')      closeLightbox();
+    if (e.key === 'ArrowLeft'  && galleryImages.length) stepGallery(-1);
+    if (e.key === 'ArrowRight' && galleryImages.length) stepGallery(1);
+  });
+
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  closeBtn.addEventListener('click', closeLightbox);
 </script>
