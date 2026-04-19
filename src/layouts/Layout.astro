@@ -19,7 +19,6 @@ const {
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <title>{title}</title>
 
-  <!-- Google Fonts: Fraunces (serif display) + Inter (body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -30,52 +29,45 @@ const {
 
 <body class="bg-f-white text-f-ink font-sans antialiased">
 
-  <!-- Film grain overlay — SVG feTurbulence noise, pointer-events: none -->
-  <div class="grain-overlay" aria-hidden="true">
-    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-      <filter id="film-grain">
+  <!--
+    Film grain overlay.
+    The SVG lives inside a 300% container so position jitter never shows an edge.
+    seed is mutated by JS at ~8fps — each new seed = a completely different noise
+    pattern, which is how real film grain behaves (not a shifted tile).
+    mix-blend-mode: overlay at low opacity = highlight lift + shadow depth = Portra texture.
+    z-index 40 keeps it below the nav (z-50) so navigation stays readable.
+  -->
+  <div class="grain-wrap" aria-hidden="true">
+    <svg id="grain-svg" xmlns="http://www.w3.org/2000/svg" class="grain-svg">
+      <filter id="film-grain" x="0%" y="0%" width="100%" height="100%">
         <feTurbulence
+          id="grain-turb"
           type="fractalNoise"
-          baseFrequency="0.72"
-          numOctaves="4"
+          baseFrequency="0.65"
+          numOctaves="3"
           stitchTiles="stitch"
+          seed="1"
         />
         <feColorMatrix type="saturate" values="0" />
       </filter>
-      <rect width="100%" height="100%" filter="url(#film-grain)" opacity="1" />
+      <rect width="100%" height="100%" filter="url(#film-grain)" />
     </svg>
   </div>
 
   <!-- ── Navigation ── -->
   <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
     <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-      <a
-        href="#hero"
-        class="font-serif text-lg text-f-ink tracking-tight hover:opacity-60 transition-opacity"
-      >
+      <a href="#hero" class="font-serif text-lg text-f-ink tracking-tight hover:opacity-60 transition-opacity">
         Spencer Lane
       </a>
 
-      <!-- Desktop links -->
       <ul class="hidden md:flex items-center gap-8">
-        <li>
-          <a href="#work" class="nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray hover:text-f-ink transition-colors">
-            Work
-          </a>
-        </li>
-        <li>
-          <a href="#switzerland" class="nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray hover:text-f-ink transition-colors">
-            Switzerland
-          </a>
-        </li>
-        <li>
-          <a href="#work-with-me" class="nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray hover:text-f-ink transition-colors">
-            Collab
-          </a>
-        </li>
+        <li><a href="#work"         class="nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray hover:text-f-ink transition-colors">Work</a></li>
+        <li><a href="#switzerland"  class="nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray hover:text-f-ink transition-colors">Switzerland</a></li>
+        <li><a href="#work-with-me" class="nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray hover:text-f-ink transition-colors">Collab</a></li>
         <li>
           <a
-            href="mailto:hello@spencerlane.com"
+            href="mailto:spencerhortonmedia@gmail.com"
             class="text-xs tracking-[0.15em] uppercase font-medium px-4 py-2 border border-f-ink text-f-ink hover:bg-f-ink hover:text-f-white transition-all duration-200"
           >
             Contact
@@ -83,7 +75,6 @@ const {
         </li>
       </ul>
 
-      <!-- Mobile hamburger -->
       <button id="mobile-menu-btn" class="md:hidden text-f-ink" aria-label="Open menu" aria-expanded="false">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
           <line x1="2" y1="5"  x2="20" y2="5"  />
@@ -93,16 +84,12 @@ const {
       </button>
     </div>
 
-    <!-- Mobile menu -->
-    <div
-      id="mobile-menu"
-      class="hidden md:hidden bg-f-white/95 backdrop-blur border-t border-f-border px-6 py-6"
-    >
+    <div id="mobile-menu" class="hidden md:hidden bg-f-white/95 backdrop-blur border-t border-f-border px-6 py-6">
       <ul class="flex flex-col gap-5">
         <li><a href="#work"         class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Work</a></li>
         <li><a href="#switzerland"  class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Switzerland</a></li>
         <li><a href="#work-with-me" class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Collab</a></li>
-        <li><a href="mailto:hello@spencerlane.com" class="text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Contact</a></li>
+        <li><a href="mailto:spencerhortonmedia@gmail.com" class="text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Contact</a></li>
       </ul>
     </div>
   </nav>
@@ -111,82 +98,143 @@ const {
     <slot />
   </main>
 
-  <!-- ── Global styles ── -->
   <style is:global>
     html { scroll-behavior: smooth; }
 
-    /* Film grain — fixed, pointer-events off, subtle multiply blend */
-    .grain-overlay {
+    /* ── Film grain ── */
+    .grain-wrap {
       position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
+      top: -100%;
+      left: -100%;
+      width: 300%;
+      height: 300%;
       pointer-events: none;
       z-index: 40;
-      opacity: 0.045;
-      mix-blend-mode: multiply;
+      opacity: 0.12;
+      mix-blend-mode: overlay;
+      will-change: transform;
     }
+    .grain-svg { width: 100%; height: 100%; display: block; }
 
-    /* Scroll-reveal base state */
+    /* ── Unified image color grade ──
+       Pulls all images toward the same "roll" — slightly desaturated,
+       faint sepia, pulled contrast. Swap values here to regradesite-wide. */
+    img {
+      filter: contrast(0.91) saturate(0.82) sepia(0.08) brightness(0.97);
+      opacity: 0;
+      transition: opacity 0.9s ease;
+    }
+    img.img-loaded { opacity: 1; }
+
+    /* ── Typography ── */
+    body { line-height: 1.7; }
+    h1, h2, h3, h4 { letter-spacing: -0.01em; }
+
+    /* ── Scroll reveal — fade only, no slide ── */
     .reveal {
       opacity: 0;
-      transform: translateY(22px);
-      transition: opacity 0.75s ease, transform 0.75s ease;
+      transition: opacity 1s ease;
     }
-    .reveal.visible       { opacity: 1; transform: translateY(0); }
-    .reveal-d1            { transition-delay: 0.1s; }
-    .reveal-d2            { transition-delay: 0.2s; }
-    .reveal-d3            { transition-delay: 0.3s; }
-    .reveal-d4            { transition-delay: 0.4s; }
+    .reveal.visible { opacity: 1; }
+    .reveal-d1 { transition-delay: 0.12s; }
+    .reveal-d2 { transition-delay: 0.24s; }
+    .reveal-d3 { transition-delay: 0.36s; }
+    .reveal-d4 { transition-delay: 0.48s; }
 
-    /* Nav scrolled */
+    /* ── Nav scrolled ── */
     #main-nav.scrolled {
-      background: rgba(245, 242, 236, 0.92);
+      background: rgba(245, 242, 236, 0.94);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(216, 211, 203, 0.6);
+      border-bottom: 1px solid rgba(216, 211, 203, 0.55);
     }
 
-    /* Lightbox fade */
+    /* ── Lightbox ── */
     #lightbox { transition: opacity 0.25s ease; }
     #lightbox.hidden { opacity: 0; }
   </style>
 
-  <!-- ── Global scripts ── -->
   <script>
-    // Nav: add scrolled class
+    // ── Film grain animation ──
+    // Changes the SVG feTurbulence seed at ~8fps.
+    // Each new seed = entirely new noise pattern (not just a shifted tile).
+    // Also jitters the wrapper position a few pixels to add physical film weave.
+    const grainTurb = document.getElementById('grain-turb');
+    const grainWrap = document.querySelector('.grain-wrap') as HTMLElement | null;
+
+    const GRAIN_FPS = 8;
+    const GRAIN_INTERVAL = 1000 / GRAIN_FPS;
+
+    // Pre-computed offsets — avoids allocations in the animation loop
+    const jitter: [number, number][] = [
+      [0, 0], [-4, -7], [9, -2], [-6, 11], [5, -9],
+      [-11, 4], [7, 8], [-3, -6], [10, 3], [-8, -12],
+      [2, 9], [-7, 1], [11, -5], [-2, 8], [6, -11],
+    ];
+
+    let jitterIdx = 0;
+    let lastGrainTime = 0;
+
+    function tickGrain(timestamp: number) {
+      requestAnimationFrame(tickGrain);
+      if (timestamp - lastGrainTime < GRAIN_INTERVAL) return;
+      lastGrainTime = timestamp;
+
+      if (grainTurb) {
+        grainTurb.setAttribute('seed', String(Math.floor(Math.random() * 9999)));
+      }
+      if (grainWrap) {
+        const [x, y] = jitter[jitterIdx % jitter.length];
+        grainWrap.style.transform = `translate(${x}px, ${y}px)`;
+        jitterIdx++;
+      }
+    }
+
+    // Respect prefers-reduced-motion — grain stays static if user prefers it
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      requestAnimationFrame(tickGrain);
+    }
+
+    // ── Image fade-in on load ──
+    document.querySelectorAll<HTMLImageElement>('img').forEach(img => {
+      const mark = () => img.classList.add('img-loaded');
+      if (img.complete && img.naturalWidth > 0) mark();
+      else {
+        img.addEventListener('load', mark);
+        img.addEventListener('error', mark); // broken images shouldn't stay invisible
+      }
+    });
+
+    // ── Nav scrolled ──
     const nav = document.getElementById('main-nav');
     window.addEventListener('scroll', () => {
       nav?.classList.toggle('scrolled', window.scrollY > 60);
     }, { passive: true });
 
-    // Mobile menu toggle
+    // ── Mobile menu ──
     const mobileBtn  = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     mobileBtn?.addEventListener('click', () => {
       const open = mobileMenu?.classList.toggle('hidden') === false;
       mobileBtn.setAttribute('aria-expanded', String(open));
     });
-
-    // Close mobile menu on link click
     document.querySelectorAll('.mobile-nav-link').forEach(link => {
       link.addEventListener('click', () => mobileMenu?.classList.add('hidden'));
     });
 
-    // Scroll-reveal: IntersectionObserver
-    const observer = new IntersectionObserver(
-      (entries) => {
+    // ── Scroll reveal (fade only) ──
+    const revealObserver = new IntersectionObserver(
+      entries => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
+            revealObserver.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     );
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
   </script>
 
 </body>

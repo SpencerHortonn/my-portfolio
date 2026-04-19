@@ -1,6 +1,8 @@
 ---
 import { site, collaborators, socials } from '../config/content';
 
+// Contact details pulled from config — edit in src/config/content.ts
+
 // What I offer — edit titles and descriptions below
 const services = [
   {
@@ -78,17 +80,35 @@ const services = [
     </div>
 
     <!-- CTA -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 reveal reveal-d3">
+    <div class="flex flex-col gap-5 reveal reveal-d3">
       <a
         href={`mailto:${site.email}`}
-        class="inline-block px-8 py-4 bg-f-ink text-f-white font-sans text-xs tracking-[0.15em] uppercase hover:bg-f-ink/80 transition-colors"
+        class="inline-block self-start px-8 py-4 bg-f-ink text-f-white font-sans text-xs tracking-[0.15em] uppercase hover:bg-f-ink/80 transition-colors"
       >
         Get in touch
       </a>
-      <span class="font-sans text-sm text-f-gray">
-        or find me everywhere
-        <a href={socials.tiktok} target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 hover:text-f-ink transition-colors">@spencerchicken</a>
-      </span>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 font-sans text-sm text-f-gray">
+        <a
+          href={`mailto:${site.email}`}
+          class="hover:text-f-ink transition-colors"
+        >
+          {site.email}
+        </a>
+        <a
+          href={site.phoneTel}
+          class="hover:text-f-ink transition-colors"
+        >
+          {site.phone}
+        </a>
+        <a
+          href={socials.tiktok}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline underline-offset-2 hover:text-f-ink transition-colors"
+        >
+          @spencerchicken
+        </a>
+      </div>
     </div>
 
   </div>

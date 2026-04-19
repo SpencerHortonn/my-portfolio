@@ -2,9 +2,9 @@
 import { site } from '../config/content';
 
 // TODO: swap in real hero — full-bleed photo or looped silent video
-// Ideal: landscape coastal/surf shot, warm or slightly faded tones
+// Mountain road at golden hour — Luca Bravo, very Kodak Portra in tone
 const heroImage =
-  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=85&auto=format&fit=crop';
+  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=85&auto=format&fit=crop';
 ---
 
 <section
@@ -21,9 +21,16 @@ const heroImage =
     aria-label="Coastal landscape — warm, sun-bleached tones"
   ></div>
 
-  <!-- Light wash gradient — bottom to top so text is readable without going dark -->
+  <!-- Bottom-fade: lifts text off the image -->
   <div
-    class="absolute inset-0 bg-gradient-to-t from-f-white via-f-white/30 to-transparent"
+    class="absolute inset-0 bg-gradient-to-t from-f-white via-f-white/25 to-transparent"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Vignette: darkens edges like a real film frame, leaves centre open -->
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="background: radial-gradient(ellipse at 50% 45%, transparent 35%, rgba(26,24,21,0.52) 100%);"
     aria-hidden="true"
   ></div>
 
