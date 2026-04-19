@@ -27,15 +27,22 @@ const {
   />
 </head>
 
-<body class="bg-f-white text-f-ink font-sans antialiased">
+<!--
+  body is position:relative so the absolute grain-wrap can fill the full page height.
+  The grain-wrap is the FIRST child — no z-index needed; later DOM siblings paint
+  on top of it naturally. This means the grain scrolls with the page like
+  physical texture on a strip of film, not a floating overlay.
+-->
+<body class="bg-f-white text-f-ink font-sans antialiased" style="position:relative;">
 
   <!--
-    Film grain overlay.
-    The SVG lives inside a 300% container so position jitter never shows an edge.
-    seed is mutated by JS at ~8fps — each new seed = a completely different noise
-    pattern, which is how real film grain behaves (not a shifted tile).
-    mix-blend-mode: overlay at low opacity = highlight lift + shadow depth = Portra texture.
-    z-index 40 keeps it below the nav (z-50) so navigation stays readable.
+    Film grain — position:absolute, covers the full document height.
+    JS updates its height whenever the page grows (images loading, etc.).
+    seed is mutated at ~8fps so the grain texture changes every frame like
+    real film grain, but because it scrolls WITH the page it feels printed
+    into the paper rather than hovering above it.
+    mix-blend-mode:multiply darkens the warm beige in a grain pattern.
+    No position jitter needed — natural scroll movement provides the motion.
   -->
   <div class="grain-wrap" aria-hidden="true">
     <svg id="grain-svg" xmlns="http://www.w3.org/2000/svg" class="grain-svg">
@@ -84,7 +91,7 @@ const {
       </button>
     </div>
 
-    <div id="mobile-menu" class="hidden md:hidden bg-f-white/95 backdrop-blur border-t border-f-border px-6 py-6">
+    <div id="mobile-menu" class="hidden md:hidden border-t border-f-border px-6 py-6" style="background:rgba(229,220,200,0.97);">
       <ul class="flex flex-col gap-5">
         <li><a href="#work"         class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Work</a></li>
         <li><a href="#switzerland"  class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Switzerland</a></li>
@@ -101,31 +108,30 @@ const {
   <style is:global>
     html { scroll-behavior: smooth; }
 
-    /* ── Film grain ──
-       multiply on a light bg is essential: overlay blends to near-invisible
-       on white/off-white because the math cancels out. multiply lets the
-       dark parts of the noise pattern show through as visible texture.
-       opacity 0.22 = clearly present without being a distraction.        */
+    /* ── Single warm-paper background across the whole page ── */
+    body {
+      background-color: #E5DCC8;
+      color: #2B2825;
+    }
+
+    /* ── Film grain — scrolls with page, not fixed above it ──
+       position:absolute + first DOM child = sits below all content
+       in natural stacking order. No z-index needed.
+       JS sets height = full document scrollHeight so it covers
+       every pixel of the page. Seed animation gives the jitter.   */
     .grain-wrap {
-      position: fixed;
-      top: -100%;
-      left: -100%;
-      width: 300%;
-      height: 300%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%; /* JS overrides this with scrollHeight */
       pointer-events: none;
-      z-index: 40;
-      opacity: 0.22;
+      opacity: 0.20;
       mix-blend-mode: multiply;
-      will-change: transform;
     }
     .grain-svg { width: 100%; height: 100%; display: block; }
 
-    /* Lightbox images bypass the global fade-in — they're injected dynamically */
-    #lightbox img { opacity: 1 !important; transition: none !important; filter: none !important; }
-
-    /* ── Unified image color grade ──
-       Pulls all images toward the same "roll" — slightly desaturated,
-       faint sepia, pulled contrast. Swap values here to regradesite-wide. */
+    /* ── Image color grade — Kodak Portra-adjacent ── */
     img {
       filter: contrast(0.91) saturate(0.82) sepia(0.08) brightness(0.97);
       opacity: 0;
@@ -133,27 +139,34 @@ const {
     }
     img.img-loaded { opacity: 1; }
 
+    /* Lightbox images: bypass fade-in and grade (injected dynamically) */
+    #lightbox img {
+      opacity: 1 !important;
+      transition: none !important;
+      filter: none !important;
+    }
+
     /* ── Typography ── */
     body { line-height: 1.7; }
-    h1, h2, h3, h4 { letter-spacing: -0.01em; }
-
-    /* ── Scroll reveal — fade only, no slide ── */
-    .reveal {
-      opacity: 0;
-      transition: opacity 1s ease;
+    h1, h2, h3, h4 {
+      letter-spacing: -0.01em;
+      color: #1F1C18;
     }
+
+    /* ── Scroll reveal — pure fade, no slide ── */
+    .reveal { opacity: 0; transition: opacity 1s ease; }
     .reveal.visible { opacity: 1; }
     .reveal-d1 { transition-delay: 0.12s; }
     .reveal-d2 { transition-delay: 0.24s; }
     .reveal-d3 { transition-delay: 0.36s; }
     .reveal-d4 { transition-delay: 0.48s; }
 
-    /* ── Nav scrolled ── */
+    /* ── Nav scrolled — matches the warm-paper background ── */
     #main-nav.scrolled {
-      background: rgba(245, 242, 236, 0.94);
+      background: rgba(229, 220, 200, 0.94);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(216, 211, 203, 0.55);
+      border-bottom: 1px solid rgba(191, 179, 156, 0.5);
     }
 
     /* ── Lightbox ── */
@@ -162,53 +175,48 @@ const {
   </style>
 
   <script>
-    // ── Film grain animation ──
-    // Changes the SVG feTurbulence seed at ~8fps.
-    // Each new seed = entirely new noise pattern (not just a shifted tile).
-    // Also jitters the wrapper position a few pixels to add physical film weave.
+    // ── Film grain — seed animation at 8fps ──
+    // Only seed changes; no position jitter (grain scrolls naturally with page).
     const grainTurb = document.getElementById('grain-turb');
-    const grainWrap = document.querySelector('.grain-wrap') as HTMLElement | null;
+    const grainWrap = document.querySelector<HTMLElement>('.grain-wrap');
 
-    const GRAIN_FPS = 8;
-    const GRAIN_INTERVAL = 1000 / GRAIN_FPS;
-
-    // Pre-computed offsets — avoids allocations in the animation loop
-    const jitter: [number, number][] = [
-      [0, 0], [-4, -7], [9, -2], [-6, 11], [5, -9],
-      [-11, 4], [7, 8], [-3, -6], [10, 3], [-8, -12],
-      [2, 9], [-7, 1], [11, -5], [-2, 8], [6, -11],
-    ];
-
-    let jitterIdx = 0;
-    let lastGrainTime = 0;
-
-    function tickGrain(timestamp: number) {
-      requestAnimationFrame(tickGrain);
-      if (timestamp - lastGrainTime < GRAIN_INTERVAL) return;
-      lastGrainTime = timestamp;
-
-      if (grainTurb) {
-        grainTurb.setAttribute('seed', String(Math.floor(Math.random() * 9999)));
-      }
+    // Keep grain height = full page so no gap appears at bottom when scrolling
+    function syncGrainHeight() {
       if (grainWrap) {
-        const [x, y] = jitter[jitterIdx % jitter.length];
-        grainWrap.style.transform = `translate(${x}px, ${y}px)`;
-        jitterIdx++;
+        grainWrap.style.height = Math.max(
+          document.documentElement.scrollHeight,
+          document.body.scrollHeight,
+          window.innerHeight
+        ) + 'px';
       }
     }
+    syncGrainHeight();
+    window.addEventListener('resize', syncGrainHeight, { passive: true });
+    window.addEventListener('load',   syncGrainHeight);
+    // Re-sync 1 s after load to catch lazy images that expanded the page
+    setTimeout(syncGrainHeight, 1000);
 
-    // Respect prefers-reduced-motion — grain stays static if user prefers it
+    const GRAIN_INTERVAL = 1000 / 8; // 8 fps
+    let lastGrainTime = 0;
+
+    function tickGrain(ts: number) {
+      requestAnimationFrame(tickGrain);
+      if (ts - lastGrainTime < GRAIN_INTERVAL) return;
+      lastGrainTime = ts;
+      if (grainTurb) grainTurb.setAttribute('seed', String(Math.floor(Math.random() * 9999)));
+    }
+
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       requestAnimationFrame(tickGrain);
     }
 
-    // ── Image fade-in on load ──
+    // ── Image fade-in ──
     document.querySelectorAll<HTMLImageElement>('img').forEach(img => {
       const mark = () => img.classList.add('img-loaded');
       if (img.complete && img.naturalWidth > 0) mark();
       else {
-        img.addEventListener('load', mark);
-        img.addEventListener('error', mark); // broken images shouldn't stay invisible
+        img.addEventListener('load',  mark);
+        img.addEventListener('error', mark);
       }
     });
 
@@ -229,19 +237,14 @@ const {
       link.addEventListener('click', () => mobileMenu?.classList.add('hidden'));
     });
 
-    // ── Scroll reveal (fade only) ──
-    const revealObserver = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            revealObserver.unobserve(entry.target);
-          }
-        });
-      },
+    // ── Scroll reveal ──
+    const ro = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); }
+      }),
       { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     );
-    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
   </script>
 
 </body>
