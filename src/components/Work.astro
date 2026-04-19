@@ -1,0 +1,190 @@
+---
+import { workItems } from '../config/content';
+---
+
+<!-- Work grid section -->
+<section id="work" class="py-24 md:py-40 bg-f-cream">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="mb-14 reveal">
+      <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-blue mb-4">
+        The Work
+      </p>
+      <h2 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight">
+        Films, photos,<br />
+        and moments worth keeping.
+      </h2>
+    </div>
+
+    <!--
+      CSS columns gives a natural masonry layout for mixed portrait/landscape.
+      Each item breaks inside avoided so it never splits across columns.
+    -->
+    <div class="columns-2 md:columns-3 gap-3 md:gap-4">
+      {workItems.map((item, i) => (
+        <button
+          type="button"
+          class={`work-item group relative w-full break-inside-avoid mb-3 md:mb-4 overflow-hidden bg-f-white text-left cursor-pointer reveal reveal-d${(i % 3) + 1}`}
+          data-item={JSON.stringify(item)}
+          aria-label={`View: ${item.title}`}
+        >
+          <!-- Thumbnail -->
+          <div class={`relative overflow-hidden ${item.orientation === 'portrait' ? 'aspect-[2/3]' : 'aspect-video'}`}>
+            <img
+              src={item.thumbnail}
+              alt={item.title}
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+
+            <!-- Hover overlay -->
+            <div
+              class="absolute inset-0 bg-f-ink/0 group-hover:bg-f-ink/25 transition-colors duration-300 flex items-center justify-center"
+              aria-hidden="true"
+            >
+              {item.type === 'video' ? (
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="23" stroke="white" stroke-width="1.5"/>
+                    <polygon points="20,16 36,24 20,32" fill="white"/>
+                  </svg>
+                </div>
+              ) : (
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round">
+                    <path d="M5 27L27 5M5 5h22v22"/>
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            <!-- Type badge -->
+            {item.type === 'video' && (
+              <div class="absolute top-3 left-3 bg-f-white/90 px-2 py-1" aria-hidden="true">
+                <span class="font-sans text-[10px] tracking-[0.12em] uppercase text-f-ink">Film</span>
+              </div>
+            )}
+          </div>
+
+          <!-- Caption row -->
+          <div class="p-3 md:p-4">
+            <p class="font-serif text-sm md:text-base text-f-ink mb-0.5">{item.title}</p>
+            <p class="font-sans text-xs text-f-gray">{item.caption}</p>
+          </div>
+        </button>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Lightbox modal ── -->
+<div
+  id="lightbox"
+  class="fixed inset-0 z-[100] hidden items-center justify-center bg-f-ink/90 backdrop-blur-sm"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Media lightbox"
+>
+  <div class="relative w-full max-w-5xl mx-4 md:mx-8">
+
+    <!-- Close -->
+    <button
+      id="lightbox-close"
+      class="absolute -top-12 right-0 text-f-white/60 hover:text-f-white transition-colors"
+      aria-label="Close lightbox"
+      type="button"
+    >
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <line x1="4" y1="4"  x2="24" y2="24"/>
+        <line x1="24" y1="4" x2="4"  y2="24"/>
+      </svg>
+    </button>
+
+    <!-- Dynamic content injected by JS -->
+    <div id="lightbox-content"></div>
+
+    <!-- Footer row -->
+    <div class="mt-4 flex items-baseline justify-between gap-4">
+      <p id="lightbox-title"   class="font-serif text-f-white text-lg font-light"></p>
+      <p id="lightbox-caption" class="font-sans text-f-white/50 text-xs shrink-0"></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const lightbox        = document.getElementById('lightbox')!;
+  const lightboxContent = document.getElementById('lightbox-content')!;
+  const lightboxTitle   = document.getElementById('lightbox-title')!;
+  const lightboxCaption = document.getElementById('lightbox-caption')!;
+  const closeBtn        = document.getElementById('lightbox-close')!;
+
+  function openLightbox(item: Record<string, any>) {
+    lightboxTitle.textContent   = item.title;
+    lightboxCaption.textContent = item.caption;
+
+    if (item.type === 'photo') {
+      lightboxContent.innerHTML = `
+        <img
+          src="${item.fullUrl || item.thumbnail}"
+          alt="${item.title}"
+          class="w-full max-h-[80vh] object-contain"
+        />`;
+    } else if (item.type === 'video' && item.embedUrl) {
+      lightboxContent.innerHTML = `
+        <div class="aspect-video w-full">
+          <iframe
+            src="${item.embedUrl}"
+            class="w-full h-full"
+            frameborder="0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+            title="${item.title}"
+          ></iframe>
+        </div>`;
+    } else {
+      // Video placeholder — no embed URL yet
+      lightboxContent.innerHTML = `
+        <div class="aspect-video w-full relative overflow-hidden flex flex-col items-center justify-center gap-4">
+          <img
+            src="${item.thumbnail}"
+            alt="${item.title}"
+            class="absolute inset-0 w-full h-full object-cover opacity-25"
+          />
+          <div class="relative text-center px-6">
+            <p class="font-serif text-white text-2xl mb-2">${item.title}</p>
+            <p class="font-sans text-white/50 text-sm">
+              Video coming soon — catch it @spencerchicken on TikTok or YouTube.
+            </p>
+          </div>
+        </div>`;
+    }
+
+    lightbox.classList.remove('hidden');
+    lightbox.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.add('hidden');
+    lightbox.classList.remove('flex');
+    lightboxContent.innerHTML = '';
+    document.body.style.overflow = '';
+  }
+
+  // Attach to each grid button
+  document.querySelectorAll<HTMLElement>('.work-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      try {
+        const item = JSON.parse(btn.dataset.item || '{}');
+        openLightbox(item);
+      } catch (_) {}
+    });
+  });
+
+  // Close handlers
+  lightbox.addEventListener('click',   e => { if (e.target === lightbox) closeLightbox(); });
+  closeBtn.addEventListener('click',   closeLightbox);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>

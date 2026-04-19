@@ -1,0 +1,74 @@
+---
+import { site, socials } from '../config/content';
+---
+
+<footer class="bg-f-cream border-t border-f-border py-16">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-10">
+
+      <!-- Brand -->
+      <div>
+        <p class="font-serif text-2xl text-f-ink mb-1">{site.name}</p>
+        <!-- TODO: swap in real email (see src/config/content.ts) -->
+        <a
+          href={`mailto:${site.email}`}
+          class="font-sans text-sm text-f-gray hover:text-f-ink transition-colors"
+        >
+          {site.email}
+        </a>
+      </div>
+
+      <!-- Social links -->
+      <nav aria-label="Social media">
+        <ul class="flex items-center gap-8">
+          <li>
+            <a
+              href={socials.tiktok}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok — @spencerchicken"
+              class="font-sans text-sm text-f-gray hover:text-f-ink transition-colors tracking-wide"
+            >
+              TikTok
+            </a>
+          </li>
+          <li>
+            <a
+              href={socials.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram — @spencerchicken"
+              class="font-sans text-sm text-f-gray hover:text-f-ink transition-colors tracking-wide"
+            >
+              Instagram
+            </a>
+          </li>
+          <li>
+            <a
+              href={socials.youtube}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="YouTube — @spencerchicken"
+              class="font-sans text-sm text-f-gray hover:text-f-ink transition-colors tracking-wide"
+            >
+              YouTube
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="mt-12 pt-8 border-t border-f-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <p class="font-sans text-xs text-f-gray/50">
+        &copy; Spencer Lane 2026. All rights reserved.
+      </p>
+      <p class="font-sans text-xs text-f-gray/50">
+        @spencerchicken &mdash; TikTok &middot; Instagram &middot; YouTube
+      </p>
+    </div>
+
+  </div>
+</footer>

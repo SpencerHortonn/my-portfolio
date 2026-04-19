@@ -1,0 +1,95 @@
+---
+import { site, collaborators, socials } from '../config/content';
+
+// What I offer — edit titles and descriptions below
+const services = [
+  {
+    title: 'Short-form video',
+    desc:  'TikTok, Reels, Shorts — native-format content made by someone who actually lives on the platforms.',
+  },
+  {
+    title: 'Photography',
+    desc:  'Available-light portraits, travel editorial, lifestyle product work. No studio required.',
+  },
+  {
+    title: 'Cinematic content',
+    desc:  'Longer-form brand films with a travel or adventure angle. Story first, specs second.',
+  },
+  {
+    title: 'UGC-adjacent',
+    desc:  'Creator-feel content without the agency price tag. Raw, honest, on-brand.',
+  },
+];
+---
+
+<section id="work-with-me" class="py-24 md:py-40 bg-f-white">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <!-- Header -->
+    <div class="max-w-2xl mb-16 reveal">
+      <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-blue mb-5">
+        Work with me
+      </p>
+      <h2 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight mb-8">
+        For brands that<br />
+        actually believe<br />
+        in something.
+      </h2>
+      <p class="font-sans text-base md:text-[17px] text-f-gray font-light leading-relaxed">
+        I make content that lands — not because of the specs, but because I'm paying attention. If your brand is doing something worth showing, I want to help show it. Switzerland content starts June 28th. That's a unique window.
+      </p>
+    </div>
+
+    <!-- Services — grid with hairline borders -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-f-border mb-20 reveal reveal-d1">
+      {services.map(service => (
+        <div class="bg-f-white p-8 md:p-10">
+          <h3 class="font-serif text-xl text-f-ink mb-3">{service.title}</h3>
+          <p class="font-sans text-sm text-f-gray font-light leading-relaxed">{service.desc}</p>
+        </div>
+      ))}
+    </div>
+
+    <!-- Past collaborators -->
+    <div class="mb-20 reveal reveal-d2">
+      <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-gray mb-8">
+        Past collaborators
+      </p>
+      <div class="flex flex-wrap items-center gap-6">
+        {collaborators.map(collab => (
+          <div>
+            {collab.logo ? (
+              /* Real logo image */
+              <img
+                src={collab.logo}
+                alt={collab.name}
+                class="h-8 opacity-50 hover:opacity-90 transition-opacity"
+                loading="lazy"
+              />
+            ) : (
+              /* TODO: replace this text pill with a real logo image */
+              <span class="font-serif text-base text-f-gray/50 border border-f-border px-5 py-2.5 inline-block">
+                {collab.name}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 reveal reveal-d3">
+      <a
+        href={`mailto:${site.email}`}
+        class="inline-block px-8 py-4 bg-f-ink text-f-white font-sans text-xs tracking-[0.15em] uppercase hover:bg-f-ink/80 transition-colors"
+      >
+        Get in touch
+      </a>
+      <span class="font-sans text-sm text-f-gray">
+        or find me everywhere
+        <a href={socials.tiktok} target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 hover:text-f-ink transition-colors">@spencerchicken</a>
+      </span>
+    </div>
+
+  </div>
+</section>

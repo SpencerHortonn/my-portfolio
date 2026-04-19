@@ -1,0 +1,75 @@
+---
+import { site } from '../config/content';
+
+// TODO: swap in real hero — full-bleed photo or looped silent video
+// Ideal: landscape coastal/surf shot, warm or slightly faded tones
+const heroImage =
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=85&auto=format&fit=crop';
+---
+
+<section
+  id="hero"
+  class="relative w-full h-screen min-h-[600px] flex items-end pb-20 md:pb-32 overflow-hidden"
+  aria-label="Hero"
+>
+  <!-- Background -->
+  <div
+    id="hero-bg"
+    class="absolute inset-0 bg-cover bg-center scale-105"
+    style={`background-image: url('${heroImage}');`}
+    role="img"
+    aria-label="Coastal landscape — warm, sun-bleached tones"
+  ></div>
+
+  <!-- Light wash gradient — bottom to top so text is readable without going dark -->
+  <div
+    class="absolute inset-0 bg-gradient-to-t from-f-white via-f-white/30 to-transparent"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-6xl mx-auto px-6 w-full">
+    <p class="font-sans text-xs tracking-[0.28em] uppercase text-f-gray mb-5 reveal">
+      Tyler, TX &mdash; Est. 2008
+    </p>
+    <h1
+      class="font-serif font-light text-f-ink leading-none tracking-tight mb-6 reveal reveal-d1"
+      style="font-size: clamp(3.5rem, 10vw, 8rem);"
+    >
+      {site.name}
+    </h1>
+    <p class="font-serif italic text-xl md:text-2xl text-f-gray font-light max-w-sm leading-snug reveal reveal-d2">
+      {site.tagline}
+    </p>
+  </div>
+
+  <!-- Scroll cue -->
+  <div
+    class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 reveal reveal-d3"
+    aria-hidden="true"
+  >
+    <span class="font-sans text-[10px] tracking-[0.25em] uppercase text-f-gray/70">Scroll</span>
+    <div class="scroll-line w-px h-10 bg-f-gray/40"></div>
+  </div>
+</section>
+
+<style>
+  .scroll-line {
+    animation: line-drop 2.2s ease-in-out infinite;
+    transform-origin: top center;
+  }
+  @keyframes line-drop {
+    0%, 100% { opacity: 0.25; transform: scaleY(0.4); }
+    50%       { opacity: 0.8;  transform: scaleY(1);   }
+  }
+</style>
+
+<script>
+  // Subtle parallax — only runs above the fold
+  const bg = document.getElementById('hero-bg');
+  const limit = window.innerHeight;
+  window.addEventListener('scroll', () => {
+    if (!bg || window.scrollY >= limit) return;
+    bg.style.transform = `scale(1.05) translateY(${window.scrollY * 0.28}px)`;
+  }, { passive: true });
+</script>
