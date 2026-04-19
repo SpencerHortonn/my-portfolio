@@ -4,3 +4,8 @@ dist/
 .DS_Store
 **/.DS_Store
 *.local
+# Video files too large for GitHub (>100MB) — host on YouTube/Vimeo instead
+*.mov
+*.MOV
+*.mp4
+*.MP4
