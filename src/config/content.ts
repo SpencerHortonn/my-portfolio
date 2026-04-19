@@ -44,9 +44,8 @@ export const workItems = [
     caption: 'Short film — 2026',
     type: 'video' as const,
     orientation: 'landscape' as const,
-    thumbnail: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80&auto=format&fit=crop',
-    // Local file — works on localhost. See deploy note above.
-    videoFile: '/my%20video%20work/A%20short%20film%20about%20why%20I%20am%20going.MOV',
+    thumbnail: '/my%20video%20work/a%20short%20film%20about%20why%20I%20am%20going/thumbnail.jpg',
+    videoFile: '/my%20video%20work/a%20short%20film%20about%20why%20I%20am%20going/a%20short%20film%20about%20why%20im%20going.mov',
     embedUrl: '', // TODO: paste YouTube/Vimeo embed URL before deploying to Vercel
     fullUrl: '',
   },
@@ -56,8 +55,8 @@ export const workItems = [
     caption: 'Short film — 2025',
     type: 'video' as const,
     orientation: 'landscape' as const,
-    thumbnail: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80&auto=format&fit=crop',
-    videoFile: "/my%20video%20work/I%20am%20a%20mosaic%20of%20everyone%20I've%20ever%20loved..mov",
+    thumbnail: "/my%20video%20work/I%20am%20a%20mosaic%20of%20everyone%20i've%20ever%20loved/thumbnail.jpg",
+    videoFile: "/my%20video%20work/I%20am%20a%20mosaic%20of%20everyone%20i've%20ever%20loved/I%20am%20a%20mosaic%20of%20everyone%20I've%20ever%20loved..mov",
     embedUrl: '',
     fullUrl: '',
   },
