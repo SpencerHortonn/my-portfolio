@@ -1,0 +1,73 @@
+---
+// Fixed left-margin vine illustration — desktop only (≥ 1400px)
+// Olive #5C5840, hand-drawn feel via irregular bezier curves
+---
+
+<div class="vine-wrap" aria-hidden="true">
+  <svg viewBox="0 0 56 860" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <!-- Main stem — sinuous, hand-drawn-ish -->
+    <path
+      d="M28 10
+         C26 55  33 110  27 165
+         C21 220 35 275  28 330
+         C21 385 34 440  27 495
+         C20 550 33 605  27 660
+         C21 715 34 770  28 840"
+      stroke="#5C5840" stroke-width="1.1" stroke-linecap="round" opacity="0.5"
+    />
+
+    <!-- Leaf pair @ 140px -->
+    <g transform="translate(27,142)" opacity="0.48">
+      <path d="M0 0 C-6 -10 -16 -7 -12 0 C-16 7 -6 10 0 0Z" fill="#5C5840"/>
+      <path d="M0 0 C7  -9  15 -5  11 1 C15  8   7 10 0 0Z" fill="#5C5840" opacity="0.6"/>
+    </g>
+    <!-- Tendril -->
+    <path d="M14 142 C10 130 6 126 4 132" stroke="#5C5840" stroke-width="0.8" stroke-linecap="round" opacity="0.35"/>
+
+    <!-- Leaf pair @ 300px -->
+    <g transform="translate(28,302)" opacity="0.44">
+      <path d="M0 0 C-8 -12 -18 -8 -14 0 C-18 8 -8 12 0 0Z" fill="#5C5840"/>
+      <path d="M0 0 C9 -10 18 -6 13 1 C18 9 9 12 0 0Z" fill="#5C5840" opacity="0.55"/>
+    </g>
+    <path d="M41 300 C46 290 50 288 50 295" stroke="#5C5840" stroke-width="0.8" stroke-linecap="round" opacity="0.3"/>
+
+    <!-- Leaf pair @ 460px -->
+    <g transform="translate(27,462)" opacity="0.40">
+      <path d="M0 0 C-7 -11 -16 -7 -12 0 C-15 7 -6 10 0 0Z" fill="#5C5840"/>
+      <path d="M0 0 C8  -9  16 -5  11 1 C15  8   7 10 0 0Z" fill="#5C5840" opacity="0.6"/>
+    </g>
+
+    <!-- Leaf pair @ 620px -->
+    <g transform="translate(28,622)" opacity="0.38">
+      <path d="M0 0 C-9 -13 -19 -8 -14 0 C-18 8 -8 12 0 0Z" fill="#5C5840"/>
+      <path d="M0 0 C7  -9  14 -5  10 1 C13  8   6 10 0 0Z" fill="#5C5840" opacity="0.5"/>
+    </g>
+    <path d="M13 622 C8 610 4 608 5 616" stroke="#5C5840" stroke-width="0.8" stroke-linecap="round" opacity="0.28"/>
+
+    <!-- Leaf pair @ 780px -->
+    <g transform="translate(27,782)" opacity="0.34">
+      <path d="M0 0 C-7 -10 -15 -6 -11 0 C-14 7 -6 10 0 0Z" fill="#5C5840"/>
+      <path d="M0 0 C8  -9  15 -5  11 1 C14  8   7 10 0 0Z" fill="#5C5840" opacity="0.5"/>
+    </g>
+  </svg>
+</div>
+
+<style>
+  .vine-wrap {
+    display: none;
+    position: fixed;
+    left: 18px;
+    top: 8vh;
+    width: 56px;
+    height: 82vh;
+    pointer-events: none;
+    z-index: 10;
+  }
+  @media (min-width: 1400px) {
+    .vine-wrap { display: block; }
+  }
+  .vine-wrap svg {
+    width: 100%;
+    height: 100%;
+  }
+</style>

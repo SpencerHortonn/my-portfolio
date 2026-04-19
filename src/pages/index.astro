@@ -1,18 +1,41 @@
 ---
-import Layout       from '../layouts/Layout.astro';
-import Hero         from '../components/Hero.astro';
-import About        from '../components/About.astro';
-import Work         from '../components/Work.astro';
-import Switzerland  from '../components/Switzerland.astro';
-import WorkWithMe   from '../components/WorkWithMe.astro';
-import Footer       from '../components/Footer.astro';
+import Layout          from '../layouts/Layout.astro';
+import Hero            from '../components/Hero.astro';
+import About           from '../components/About.astro';
+import Work            from '../components/Work.astro';
+import QuoteInterlude  from '../components/QuoteInterlude.astro';
+import Switzerland     from '../components/Switzerland.astro';
+import WorkWithMe      from '../components/WorkWithMe.astro';
+import Footer          from '../components/Footer.astro';
 ---
 
 <Layout>
   <Hero />
+
+  <!-- Film tick divider -->
+  <div class="film-tick py-2" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
   <About />
+
+  <!-- Film tick divider -->
+  <div class="film-tick py-2" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
   <Work />
+
+  <QuoteInterlude />
+
   <Switzerland />
+
+  <!-- Film tick divider -->
+  <div class="film-tick py-2" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+
   <WorkWithMe />
+
   <Footer />
 </Layout>
