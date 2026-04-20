@@ -1,11 +1,21 @@
 ---
-// Hand-drawn botanical tree spine — desktop left (≥1024px), mobile vine right (<1024px)
-// Branches illuminate as sections enter viewport. Leaves bloom staggered 80ms apart.
-// Leaf and branch geometry is hardcoded — each branch has its own unique curve.
+// Hand-drawn botanical tree spine — left edge (desktop) + right vine (mobile)
+//
+// TRUNK: three overlapping path segments give genuine tapering thickness
+//   base (7px) → mid (5px) → top (3px), all warm bark brown #3D2F1F
+//   Gnarly path with 2–3 hard kinks, not a smooth S-curve.
+//   Grown from the bottom via stroke-dashoffset driven by scroll.
+//   Hidden while hero is in view; fades in as hero scrolls away.
+//
+// BRANCHES: draw in via dashoffset when their section enters the viewport.
+//   Active section branch: stroke-width 2→4px, leaves scale 1→1.2.
+//   Past sections: stay bloomed at base weight.
+//
+// LEAVES: teardrop shapes, bloom one-at-a-time (80ms stagger) after branch draws.
 ---
 
-<!-- ══ DESKTOP — actual illustrated tree ══ -->
-<nav class="tree-desktop" id="tree-spine" aria-label="Page navigation">
+<!-- ══ DESKTOP — illustrated tree, fixed left ══ -->
+<nav class="tree-desktop" id="tree-spine" aria-label="Page navigation" style="opacity:0;">
 
   <svg
     class="tree-svg"
@@ -15,237 +25,235 @@
     aria-hidden="true"
     overflow="visible"
   >
-    <!-- ────────────────────────────────────────
-         TRUNK — two overlapping paths give
-         the illusion of irregular thickness.
-         Small twig nubs add organic gnarliness.
-    ──────────────────────────────────────── -->
+    <!-- ────────────────────────────
+         TRUNK — 3 segments, tapering:
+         base 7px · mid 5px · top 3px
+         Paths run BOTTOM→TOP so
+         dashoffset animation grows up.
+         Gnarly bends at ≈y580, ≈y315.
+    ──────────────────────────────── -->
 
-    <!-- Main trunk stroke -->
-    <path
-      class="trunk-main"
-      d="M38,8
-         C36,38 40,72 37,118
-         C34,164 39,208 36,252
-         C33,296 38,340 35,386
-         C32,432 37,476 34,522
-         C31,568 36,612 33,658
-         C30,704 35,748 33,792"
-      stroke="#5C5840" stroke-width="2.4" fill="none" stroke-linecap="round"
-    />
-    <!-- Bark texture — offset, thinner -->
-    <path
-      class="trunk-main"
-      d="M36,18
-         C34,52 38,88 35,134
-         C32,180 37,224 34,268
-         C31,312 36,358 33,402
-         C30,448 35,492 32,538
-         C29,584 34,628 31,672
-         C28,718 33,762 31,796"
-      stroke="#5C5840" stroke-width="0.7" fill="none" stroke-linecap="round" opacity="0.5"
+    <!-- Bark texture — single sinuous full-length path, very thin -->
+    <path id="trunk-bark"
+      d="M31,792
+         C33,750 27,706 31,662
+         C35,618 43,574 35,530
+         C28,486 30,446 28,404
+         C26,362 21,320 28,280
+         C35,240 39,200 35,158
+         C31,116 27,76 32,40
+         C37,16 36,10 37,8"
+      stroke="#3D2F1F" stroke-width="0.7" fill="none" stroke-linecap="round" opacity="0.55"
     />
 
-    <!-- Twig nubs — tiny dead branches for organic feel -->
-    <path d="M37,88  C43,84  48,80  46,76"  stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.45"/>
-    <path d="M35,238 C41,242 46,246 44,252" stroke="#5C5840" stroke-width="1.0" fill="none" stroke-linecap="round" opacity="0.40"/>
-    <path d="M34,394 C40,390 45,385 43,381" stroke="#5C5840" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.38"/>
-    <path d="M33,548 C39,552 44,557 42,563" stroke="#5C5840" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.35"/>
-    <path d="M33,708 C39,704 43,699 41,694" stroke="#5C5840" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.32"/>
+    <!-- Segment A — base (y 792→522), thickest -->
+    <path id="trunk-a"
+      d="M34,792
+         C36,754 29,716 33,676
+         C37,636 44,596 37,560
+         C30,524 34,520 32,518"
+      stroke="#3D2F1F" stroke-width="7" fill="none" stroke-linecap="round"
+    />
 
-    <!-- ────────────────────────────────────────
-         BRANCH 1 — "about"  (y ≈ 165)
-    ──────────────────────────────────────── -->
+    <!-- Segment B — mid (y 518→285), medium -->
+    <path id="trunk-b"
+      d="M32,518
+         C29,492 34,454 31,418
+         C28,382 22,342 28,308
+         C34,274 40,270 36,262"
+      stroke="#3D2F1F" stroke-width="5" fill="none" stroke-linecap="round"
+    />
+
+    <!-- Segment C — top (y 262→8), thinnest -->
+    <path id="trunk-c"
+      d="M36,262
+         C32,234 38,200 35,166
+         C32,132 28,96 33,62
+         C38,32 36,18 38,8"
+      stroke="#3D2F1F" stroke-width="3" fill="none" stroke-linecap="round"
+    />
+
+    <!-- Twig nubs — organic dead-branch stubs -->
+    <!-- These fade in as the trunk grows; no individual animation needed -->
+    <path class="twig-nub" d="M33,670 C40,665 46,659 44,654" stroke="#3D2F1F" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path class="twig-nub" d="M31,510 C38,514 44,520 42,526" stroke="#3D2F1F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path class="twig-nub" d="M29,348 C36,343 42,338 40,332" stroke="#3D2F1F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path class="twig-nub" d="M34,182 C41,186 46,191 44,197" stroke="#3D2F1F" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+    <!-- ────────────────────────
+         BRANCH 1 — "about"
+         attaches at trunk ≈ y=165
+    ──────────────────────────── -->
     <g class="branch-group" id="branch-about">
-
-      <!-- Main branch — curves rightward and slightly up -->
+      <!-- Main branch — sweeping rightward curve -->
       <path class="branch-line-main"
         d="M37,165 C58,162 88,153 115,148"
-        stroke="#5C5840" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-
-      <!-- Two sub-branches off the tip -->
+        stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Sub-branch up -->
       <path class="branch-line-sub"
         d="M115,148 C122,143 128,135 125,129"
-        stroke="#5C5840" stroke-width="1.0" fill="none" stroke-linecap="round"/>
+        stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <!-- Sub-branch down -->
       <path class="branch-line-sub"
         d="M115,148 C121,152 126,157 122,164"
-        stroke="#5C5840" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+        stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
 
-      <!-- Leaves at upper sub-branch tip (around 125, 129) -->
-      <g transform="translate(125, 129) rotate(-38)">
+      <!-- Leaves: upper cluster (around 125, 129) -->
+      <g transform="translate(125,129) rotate(-38)">
         <g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(125, 129) rotate(2)">
+      <g transform="translate(125,129) rotate(2)">
         <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(125, 129) rotate(34)">
+      <g transform="translate(125,129) rotate(34)">
         <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
-
-      <!-- Leaves at lower sub-branch tip (around 122, 164) -->
-      <g transform="translate(122, 164) rotate(-18)">
+      <!-- Leaves: lower cluster (around 122, 164) -->
+      <g transform="translate(122,164) rotate(-18)">
         <g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(122, 164) rotate(22)">
+      <g transform="translate(122,164) rotate(22)">
         <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10 0,-12 C3,-10 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
+    </g>
 
-    </g><!-- /branch-about -->
-
-
-    <!-- ────────────────────────────────────────
-         BRANCH 2 — "work"  (y ≈ 322)
-    ──────────────────────────────────────── -->
+    <!-- ────────────────────────
+         BRANCH 2 — "work"
+         attaches at trunk ≈ y=322
+    ──────────────────────────── -->
     <g class="branch-group" id="branch-work">
-
       <path class="branch-line-main"
         d="M35,322 C56,319 85,310 110,305"
-        stroke="#5C5840" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-
+        stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
       <path class="branch-line-sub"
         d="M110,305 C117,300 123,292 120,286"
-        stroke="#5C5840" stroke-width="1.0" fill="none" stroke-linecap="round"/>
+        stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
       <path class="branch-line-sub"
         d="M110,305 C117,308 122,314 118,321"
-        stroke="#5C5840" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+        stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
 
-      <!-- Upper sub-branch leaves -->
-      <g transform="translate(120, 286) rotate(-42)">
+      <g transform="translate(120,286) rotate(-42)">
         <g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(120, 286) rotate(-8)">
+      <g transform="translate(120,286) rotate(-8)">
         <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(120, 286) rotate(28)">
+      <g transform="translate(120,286) rotate(28)">
         <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
-
-      <!-- Lower sub-branch leaves -->
-      <g transform="translate(118, 321) rotate(-12)">
+      <g transform="translate(118,321) rotate(-12)">
         <g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(118, 321) rotate(24)">
+      <g transform="translate(118,321) rotate(24)">
         <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
+    </g>
 
-    </g><!-- /branch-work -->
-
-
-    <!-- ────────────────────────────────────────
-         BRANCH 3 — "switzerland"  (y ≈ 482)
-    ──────────────────────────────────────── -->
+    <!-- ────────────────────────
+         BRANCH 3 — "switzerland"
+         attaches at trunk ≈ y=482
+    ──────────────────────────── -->
     <g class="branch-group" id="branch-switzerland">
-
       <path class="branch-line-main"
         d="M34,482 C55,479 83,470 108,465"
-        stroke="#5C5840" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-
+        stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
       <path class="branch-line-sub"
         d="M108,465 C115,460 121,452 118,446"
-        stroke="#5C5840" stroke-width="1.0" fill="none" stroke-linecap="round"/>
+        stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
       <path class="branch-line-sub"
         d="M108,465 C114,468 120,475 116,482"
-        stroke="#5C5840" stroke-width="0.9" fill="none" stroke-linecap="round"/>
-      <!-- Extra tiny twig for a fuller look -->
-      <path class="branch-line-sub"
-        d="M112,460 C117,456 121,452 118,448"
-        stroke="#5C5840" stroke-width="0.7" fill="none" stroke-linecap="round" opacity="0.7"/>
+        stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
 
-      <g transform="translate(118, 446) rotate(-40)">
+      <g transform="translate(118,446) rotate(-40)">
         <g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(118, 446) rotate(-5)">
+      <g transform="translate(118,446) rotate(-5)">
         <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(118, 446) rotate(30)">
+      <g transform="translate(118,446) rotate(30)">
         <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(116, 482) rotate(-20)">
+      <g transform="translate(116,482) rotate(-20)">
         <g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(116, 482) rotate(18)">
+      <g transform="translate(116,482) rotate(18)">
         <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
+    </g>
 
-    </g><!-- /branch-switzerland -->
-
-
-    <!-- ────────────────────────────────────────
-         BRANCH 4 — "work with me"  (y ≈ 643)
-    ──────────────────────────────────────── -->
+    <!-- ────────────────────────
+         BRANCH 4 — "work with me"
+         attaches at trunk ≈ y=643
+    ──────────────────────────── -->
     <g class="branch-group" id="branch-work-with-me">
-
       <path class="branch-line-main"
         d="M33,643 C54,640 82,631 107,626"
-        stroke="#5C5840" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-
+        stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
       <path class="branch-line-sub"
         d="M107,626 C114,621 120,613 117,607"
-        stroke="#5C5840" stroke-width="1.0" fill="none" stroke-linecap="round"/>
+        stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
       <path class="branch-line-sub"
         d="M107,626 C113,630 118,636 114,643"
-        stroke="#5C5840" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+        stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
 
-      <g transform="translate(117, 607) rotate(-36)">
+      <g transform="translate(117,607) rotate(-36)">
         <g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(117, 607) rotate(0)">
+      <g transform="translate(117,607) rotate(0)">
         <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(117, 607) rotate(32)">
+      <g transform="translate(117,607) rotate(32)">
         <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(114, 643) rotate(-14)">
+      <g transform="translate(114,643) rotate(-14)">
         <g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g>
       </g>
-      <g transform="translate(114, 643) rotate(26)">
+      <g transform="translate(114,643) rotate(26)">
         <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
       </g>
+    </g>
 
-    </g><!-- /branch-work-with-me -->
+  </svg>
 
-  </svg><!-- /tree-svg -->
-
-  <!-- Clickable handwritten labels — HTML positioned over the SVG -->
-  <!-- Only visible at ≥1440px where there's room in the margin -->
-  <a href="#about"        class="tree-label" data-label-for="about"        style="top: 20.6%" aria-label="About section">about</a>
-  <a href="#work"         class="tree-label" data-label-for="work"         style="top: 40.3%" aria-label="Work section">work</a>
-  <a href="#switzerland"  class="tree-label" data-label-for="switzerland"  style="top: 60.3%" aria-label="Switzerland section">switzerland</a>
-  <a href="#work-with-me" class="tree-label" data-label-for="work-with-me" style="top: 80.4%" aria-label="Work with me section">work with me</a>
-
+  <!-- Clickable handwritten labels — HTML overlaid, visible ≥ 1440px only -->
+  <a href="#about"        class="tree-label" data-label-for="about"        style="top:20.6%" aria-label="About">about</a>
+  <a href="#work"         class="tree-label" data-label-for="work"         style="top:40.3%" aria-label="Work">work</a>
+  <a href="#switzerland"  class="tree-label" data-label-for="switzerland"  style="top:60.3%" aria-label="Switzerland">switzerland</a>
+  <a href="#work-with-me" class="tree-label" data-label-for="work-with-me" style="top:80.4%" aria-label="Work with me">work with me</a>
 </nav>
 
 
-<!-- ══ MOBILE — thin organic vine, right edge, dot markers ══ -->
-<div class="tree-mobile" id="tree-mobile" aria-hidden="true">
+<!-- ══ MOBILE — thin vine, right edge, dot markers ══ -->
+<div class="tree-mobile" id="tree-mobile" aria-hidden="true" style="opacity:0;">
   <svg viewBox="0 0 18 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M9,0 C7.5,40 10.5,80 8.5,140 C6.5,200 10,260 8,320 C6,380 9.5,440 7.5,500 C5.5,560 9,620 7,680 C5,740 8.5,780 9,800"
-      stroke="#5C5840" stroke-width="1.1" fill="none" opacity="0.35" stroke-linecap="round"
+    <!-- Vine grows bottom → top -->
+    <path id="mobile-vine"
+      d="M9,800 C8.5,780 5,740 7,680 C9,620 5.5,560 7.5,500 C9.5,440 6,380 8,320 C10,260 6.5,200 8.5,140 C10.5,80 7.5,40 9,0"
+      stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"
     />
-    <!-- Dot markers at section positions — same y% as branches above -->
+    <!-- Dot markers at same y% as desktop branches -->
     <g class="mobile-dot" id="mdot-about"        data-section="about">
-      <circle cx="9" cy="165" r="2.5" fill="none" stroke="#5C5840" stroke-width="0.9"/>
-      <circle class="dot-fill" cx="9" cy="165" r="1.4" fill="#5C5840"/>
+      <circle cx="9" cy="165" r="3" fill="none" stroke="#5C5840" stroke-width="1"/>
+      <circle class="dot-fill" cx="9" cy="165" r="1.6" fill="#5C5840"/>
     </g>
     <g class="mobile-dot" id="mdot-work"         data-section="work">
-      <circle cx="9" cy="322" r="2.5" fill="none" stroke="#5C5840" stroke-width="0.9"/>
-      <circle class="dot-fill" cx="9" cy="322" r="1.4" fill="#5C5840"/>
+      <circle cx="9" cy="322" r="3" fill="none" stroke="#5C5840" stroke-width="1"/>
+      <circle class="dot-fill" cx="9" cy="322" r="1.6" fill="#5C5840"/>
     </g>
     <g class="mobile-dot" id="mdot-switzerland"  data-section="switzerland">
-      <circle cx="9" cy="482" r="2.5" fill="none" stroke="#5C5840" stroke-width="0.9"/>
-      <circle class="dot-fill" cx="9" cy="482" r="1.4" fill="#5C5840"/>
+      <circle cx="9" cy="482" r="3" fill="none" stroke="#5C5840" stroke-width="1"/>
+      <circle class="dot-fill" cx="9" cy="482" r="1.6" fill="#5C5840"/>
     </g>
     <g class="mobile-dot" id="mdot-work-with-me" data-section="work-with-me">
-      <circle cx="9" cy="643" r="2.5" fill="none" stroke="#5C5840" stroke-width="0.9"/>
-      <circle class="dot-fill" cx="9" cy="643" r="1.4" fill="#5C5840"/>
+      <circle cx="9" cy="643" r="3" fill="none" stroke="#5C5840" stroke-width="1"/>
+      <circle class="dot-fill" cx="9" cy="643" r="1.6" fill="#5C5840"/>
     </g>
   </svg>
 </div>
 
 
 <style>
-  /* ══ Desktop tree ══ */
+  /* ══ Container ══ */
   .tree-desktop {
     display: none;
     position: fixed;
@@ -255,50 +263,67 @@
     height: calc(100vh - 72px - 28px);
     pointer-events: none;
     z-index: 20;
+    transition: opacity 0.4s ease;
   }
-  @media (min-width: 1024px) {
-    .tree-desktop { display: block; }
+  @media (min-width: 1024px) { .tree-desktop { display: block; } }
+
+  .tree-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+  /* ── Trunk segments — dashoffset set by JS scroll ──
+     Start at their full length (invisible); JS reduces to 0. */
+  #trunk-a, #trunk-b, #trunk-c, #trunk-bark {
+    stroke-dasharray: 800; /* generous; JS sets exact value */
+    stroke-dashoffset: 800;
   }
-  .tree-svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    overflow: visible;
+  .twig-nub {
+    opacity: 0;
+    transition: opacity 0.6s ease;
   }
 
-  /* Trunk — always visible at base opacity */
-  .trunk-main {
-    opacity: 0.45;
+  /* ── Branch lines — draw in on bloom ── */
+  .branch-line-main {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    stroke-width: 2px;
+    transition:
+      stroke-dashoffset 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      stroke-width 0.6s ease;
   }
+  .branch-line-sub {
+    stroke-dasharray: 130;
+    stroke-dashoffset: 130;
+    transition:
+      stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.35s,
+      stroke-width 0.6s ease;
+  }
+  .branch-group.bloomed .branch-line-main { stroke-dashoffset: 0; }
+  .branch-group.bloomed .branch-line-sub  { stroke-dashoffset: 0; }
 
-  /* Branch groups — muted by default */
-  .branch-group .branch-line-main { stroke-opacity: 0.30; transition: stroke-opacity 0.6s ease; }
-  .branch-group .branch-line-sub  { stroke-opacity: 0.20; transition: stroke-opacity 0.6s ease; }
-  .branch-group.bloomed .branch-line-main { stroke-opacity: 1; }
-  .branch-group.bloomed .branch-line-sub  { stroke-opacity: 0.80; }
+  /* ── Active branch — currently in view ── */
+  .branch-group.active-branch .branch-line-main { stroke-width: 4px; }
+  .branch-group.active-branch .branch-line-sub  { stroke-width: 2px; }
 
-  /* Leaves — start tiny + dim, bloom to full size */
+  /* ── Leaves — scale in on bloom ── */
   .leaf-scale {
     transform-box: fill-box;
     transform-origin: center center;
-    transform: scale(0.3);
-    opacity: 0.15;
-    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
-                opacity   0.7s ease-out;
+    transform: scale(0.2);
+    opacity: 0.1;
+    transition:
+      transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity   0.7s ease-out;
   }
-  .leaf-scale.bloomed {
-    transform: scale(1);
-    opacity: 1;
-  }
+  .leaf-scale.bloomed       { transform: scale(1.0); opacity: 1; }
+  .leaf-scale.active-leaf   { transform: scale(1.2) !important; }
 
-  /* Labels — Caveat handwriting, hidden on mid-desktop */
+  /* ── Labels ── */
   .tree-label {
     position: absolute;
     left: 122px;
     font-family: 'Caveat', cursive;
     font-size: 13.5px;
     color: #5C5840;
-    opacity: 0.32;
+    opacity: 0.28;
     pointer-events: all;
     text-decoration: none;
     white-space: nowrap;
@@ -306,10 +331,9 @@
     transition: opacity 0.5s ease, color 0.4s ease;
     display: none;
   }
-  @media (min-width: 1440px) {
-    .tree-label { display: block; }
-  }
-  .tree-label.label-bloomed { opacity: 0.9; color: #2B2825; }
+  @media (min-width: 1440px) { .tree-label { display: block; } }
+  .tree-label.label-bloomed { opacity: 0.8; color: #2B2825; }
+  .tree-label.label-active  { opacity: 1; color: #1F1C18; }
   .tree-label:hover { opacity: 1 !important; color: #1F1C18 !important; }
 
   /* ══ Mobile vine ══ */
@@ -322,67 +346,202 @@
     height: calc(100vh - 72px - 28px);
     pointer-events: none;
     z-index: 20;
+    transition: opacity 0.4s ease;
   }
   @media (min-width: 1024px) { .tree-mobile { display: none; } }
 
+  #mobile-vine {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+
   .mobile-dot { opacity: 0.28; transition: opacity 0.4s ease; }
-  .mobile-dot .dot-fill { opacity: 0; transition: opacity 0.4s ease; }
+  .mobile-dot .dot-fill { opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease; transform-box: fill-box; transform-origin: center; transform: scale(1); }
   .mobile-dot.bloomed { opacity: 1; }
   .mobile-dot.bloomed .dot-fill { opacity: 1; }
+  .mobile-dot.active-dot .dot-fill { transform: scale(2.2); }
 
-  /* Reduced motion */
+  /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
-    .leaf-scale        { transition: none; transform: scale(1); opacity: 0.2; }
+    .branch-line-main, .branch-line-sub { transition: none; stroke-dashoffset: 0; }
+    .leaf-scale { transition: none; transform: scale(1); opacity: 0.2; }
     .leaf-scale.bloomed { opacity: 1; }
-    .branch-group .branch-line-main,
-    .branch-group .branch-line-sub { transition: none; }
+    #trunk-a, #trunk-b, #trunk-c, #trunk-bark, #mobile-vine { stroke-dashoffset: 0 !important; }
   }
 </style>
 
 
 <script>
-  // Map section IDs to tree elements
-  const sections = ['about', 'work', 'switzerland', 'work-with-me'] as const;
+  // ── Element refs ──
+  const treeEl     = document.getElementById('tree-spine');
+  const treeMobile = document.getElementById('tree-mobile');
+  const trunkA     = document.getElementById('trunk-a')     as SVGPathElement | null;
+  const trunkB     = document.getElementById('trunk-b')     as SVGPathElement | null;
+  const trunkC     = document.getElementById('trunk-c')     as SVGPathElement | null;
+  const trunkBark  = document.getElementById('trunk-bark')  as SVGPathElement | null;
+  const mobileVine = document.getElementById('mobile-vine') as SVGPathElement | null;
 
-  function bloom(sectionId: string) {
-    // Desktop branch — gain contrast
-    const branch = document.getElementById(`branch-${sectionId}`);
-    branch?.classList.add('bloomed');
+  // Path lengths — measured once after load
+  let lenA = 0, lenB = 0, lenC = 0, lenBark = 0, lenVine = 0;
 
-    // Desktop label — light up
-    const label = document.querySelector<HTMLElement>(`.tree-label[data-label-for="${sectionId}"]`);
-    label?.classList.add('label-bloomed');
-
-    // Desktop leaves — staggered bloom (80ms between each)
-    const leaves = branch?.querySelectorAll<HTMLElement>('.leaf-scale') ?? [];
-    leaves.forEach((leaf, i) => {
-      setTimeout(() => leaf.classList.add('bloomed'), i * 80);
-    });
-
-    // Mobile dot
-    document.getElementById(`mdot-${sectionId}`)?.classList.add('bloomed');
+  function initLengths() {
+    if (trunkA)    { lenA    = trunkA.getTotalLength();    trunkA.style.strokeDasharray    = `${lenA}`;    trunkA.style.strokeDashoffset    = `${lenA}`; }
+    if (trunkB)    { lenB    = trunkB.getTotalLength();    trunkB.style.strokeDasharray    = `${lenB}`;    trunkB.style.strokeDashoffset    = `${lenB}`; }
+    if (trunkC)    { lenC    = trunkC.getTotalLength();    trunkC.style.strokeDasharray    = `${lenC}`;    trunkC.style.strokeDashoffset    = `${lenC}`; }
+    if (trunkBark) { lenBark = trunkBark.getTotalLength(); trunkBark.style.strokeDasharray = `${lenBark}`; trunkBark.style.strokeDashoffset = `${lenBark}`; }
+    if (mobileVine){ lenVine = mobileVine.getTotalLength(); mobileVine.style.strokeDasharray = `${lenVine}`; mobileVine.style.strokeDashoffset = `${lenVine}`; }
   }
 
-  const observer = new IntersectionObserver(
-    entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) bloom(e.target.id);
-      });
-    },
-    { threshold: 0.15, rootMargin: '0px 0px -15% 0px' }
+  // Helper: animate a path segment based on scroll progress window [pStart, pEnd]
+  function setOffset(path: SVGPathElement | null, len: number, pStart: number, pEnd: number, progress: number) {
+    if (!path || !len) return;
+    const p = Math.max(0, Math.min(1, (progress - pStart) / (pEnd - pStart)));
+    path.style.strokeDashoffset = `${len * (1 - p)}`;
+  }
+
+  // ── Active section tracking ──
+  const sectionIds = ['about', 'work', 'switzerland', 'work-with-me'] as const;
+  let currentActive = '';
+
+  function setActiveSection(id: string) {
+    if (id === currentActive) return;
+
+    // Deactivate old
+    if (currentActive) {
+      document.getElementById(`branch-${currentActive}`)?.classList.remove('active-branch');
+      document.querySelector(`.tree-label[data-label-for="${currentActive}"]`)?.classList.remove('label-active');
+      document.getElementById(`mdot-${currentActive}`)?.classList.remove('active-dot');
+      document.getElementById(`branch-${currentActive}`)?.querySelectorAll<HTMLElement>('.leaf-scale').forEach(l => l.classList.remove('active-leaf'));
+    }
+
+    currentActive = id;
+
+    // Activate new
+    if (id) {
+      document.getElementById(`branch-${id}`)?.classList.add('active-branch');
+      document.querySelector(`.tree-label[data-label-for="${id}"]`)?.classList.add('label-active');
+      document.getElementById(`mdot-${id}`)?.classList.add('active-dot');
+      document.getElementById(`branch-${id}`)?.querySelectorAll<HTMLElement>('.leaf-scale').forEach(l => l.classList.add('active-leaf'));
+    }
+  }
+
+  function updateActiveSection() {
+    const viewCenter = window.scrollY + window.innerHeight * 0.45;
+    let closest = '';
+    let closestDist = Infinity;
+
+    sectionIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const sectionCenter = window.scrollY + rect.top + rect.height / 2;
+      const dist = Math.abs(sectionCenter - viewCenter);
+      if (dist < closestDist) { closestDist = dist; closest = id; }
+    });
+
+    // Only set active if section is actually somewhat visible
+    const el = document.getElementById(closest);
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const inView = rect.bottom > 0 && rect.top < window.innerHeight;
+      setActiveSection(inView ? closest : '');
+    }
+  }
+
+  // ── Twig nub visibility ──
+  function updateTwigNubs(trunkProgress: number) {
+    // Nubs reveal as trunk passes their approximate y position
+    // y 670 = (792-670)/784 ≈ 16% of trunk path from bottom
+    const thresholds = [0.14, 0.35, 0.58, 0.80];
+    document.querySelectorAll<HTMLElement>('.twig-nub').forEach((nub, i) => {
+      const t = thresholds[i] ?? 0.5;
+      nub.style.opacity = trunkProgress > t ? '0.55' : '0';
+    });
+  }
+
+  // ── Main scroll handler ──
+  function updateTree() {
+    const scrollY   = window.scrollY;
+    const heroEl    = document.getElementById('hero');
+    const heroH     = heroEl ? heroEl.offsetHeight : window.innerHeight;
+    const pageH     = document.documentElement.scrollHeight;
+    const viewH     = window.innerHeight;
+
+    // Opacity: fade in from 0 as hero exits (0.7→1.0 of hero height)
+    const fadeStart = heroH * 0.70;
+    const fadeEnd   = heroH * 0.95;
+    const opacity   = Math.max(0, Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart)));
+
+    if (treeEl)     treeEl.style.opacity     = opacity.toString();
+    if (treeMobile) treeMobile.style.opacity = opacity.toString();
+
+    // Trunk growth: 0→1 from hero-exit to page-bottom
+    const trunkStart = heroH * 0.7;
+    const trunkEnd   = pageH - viewH;
+    const trunkProg  = Math.max(0, Math.min(1, (scrollY - trunkStart) / (trunkEnd - trunkStart)));
+
+    // Three segments, evenly spaced: A (0→0.35), B (0.35→0.65), C (0.65→1.0)
+    setOffset(trunkA,    lenA,    0.00, 0.35, trunkProg);
+    setOffset(trunkB,    lenB,    0.35, 0.65, trunkProg);
+    setOffset(trunkC,    lenC,    0.65, 1.00, trunkProg);
+    setOffset(trunkBark, lenBark, 0.00, 0.95, trunkProg);
+    setOffset(mobileVine, lenVine, 0.00, 0.90, trunkProg);
+
+    updateTwigNubs(trunkProg);
+    updateActiveSection();
+  }
+
+  // ── Branch + leaf bloom on section entry ──
+  const bloomedSections = new Set<string>();
+
+  function bloomBranch(sectionId: string) {
+    if (bloomedSections.has(sectionId)) return;
+    bloomedSections.add(sectionId);
+
+    const branch = document.getElementById(`branch-${sectionId}`);
+    const label  = document.querySelector<HTMLElement>(`.tree-label[data-label-for="${sectionId}"]`);
+    const mdot   = document.getElementById(`mdot-${sectionId}`);
+
+    branch?.classList.add('bloomed');
+    label?.classList.add('label-bloomed');
+    mdot?.classList.add('bloomed');
+
+    // Leaves bloom after branch finishes drawing (700ms for main + sub)
+    const leaves = branch?.querySelectorAll<HTMLElement>('.leaf-scale') ?? [];
+    leaves.forEach((leaf, i) => {
+      setTimeout(() => leaf.classList.add('bloomed'), 700 + i * 80);
+    });
+  }
+
+  const bloomObserver = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) bloomBranch(e.target.id); }),
+    { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
   );
 
-  sections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
-  });
-
-  // Smooth-scroll on label click (override href jump)
+  // ── Smooth scroll on label click ──
   document.querySelectorAll<HTMLAnchorElement>('.tree-label').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
-      const target = document.getElementById(a.dataset.labelFor ?? '');
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById(a.dataset.labelFor ?? '')?.scrollIntoView({ behavior: 'smooth' });
     });
   });
+
+  // ── Boot ──
+  // Wait for fonts + layout so getTotalLength() is accurate
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initLengths, 50));
+  } else {
+    setTimeout(initLengths, 50);
+  }
+
+  window.addEventListener('load', () => {
+    initLengths();
+    updateTree();
+    sectionIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) bloomObserver.observe(el);
+    });
+  });
+
+  window.addEventListener('scroll', updateTree, { passive: true });
 </script>
