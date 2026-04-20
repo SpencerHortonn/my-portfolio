@@ -1,25 +1,23 @@
 ---
-// About — edit copy directly in the array below
 const paragraphs = [
-  `I'm 17, based in Tyler, Texas, and I've been making things with a camera long enough that it stopped feeling like a hobby and started feeling like the only thing that made sense. Films, photos, short-form content — I care about what a frame makes you feel, not how it performs. If a shot doesn't make someone stop and actually feel something, I wasn't paying attention.`,
+  `I'm 17, based in Tyler, Texas, and I've been making things with a camera long enough that it stopped feeling like a hobby and started feeling like the only thing that made sense. Films, photos, short-form content — I care about what a frame makes you feel, not how it performs.`,
   `I'm not interested in building a career that looks good on paper but costs everything else. I'd rather make work that means something and figure out the money as it comes than flip that around. That's not a philosophy I picked up somewhere. It's just what's been true every time I've been honest about it.`,
-  `This June I'm heading to Switzerland for YWAM DTS — a five-month discipleship training program that runs through November. It's not a gap year. It's not an escape. It's where I'm supposed to be, and I can't really explain it better than that. I'm bringing my camera. I'll be creating the whole time.`,
+  `This June I'm heading to Switzerland for YWAM DTS — five months through November. It's not a gap year. It's not an escape. It's where I'm supposed to be, and I can't really explain it better than that. I'm bringing my camera.`,
 ];
 
-// Local image from public/ — the CSS global filter applies to this automatically
 const profileImage = '/image%20for%20about%20me.JPG';
 ---
 
-<section id="about" class="py-24 md:py-40">
+<section id="about" class="py-16 md:py-24">
   <div class="max-w-6xl mx-auto px-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-28 items-center">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-14 md:gap-24 items-center">
 
-      <!-- Copy -->
+      <!-- Copy — left column -->
       <div class="order-2 md:order-1">
         <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-blue mb-5 reveal">
           About
         </p>
-        <h2 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight mb-10 reveal reveal-d1">
+        <h2 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight mb-8 reveal reveal-d1">
           Filmmaker.<br />
           Photographer.<br />
           <em>Going somewhere.</em>
@@ -33,27 +31,52 @@ const profileImage = '/image%20for%20about%20me.JPG';
         </div>
       </div>
 
-      <!-- Portrait image + field note -->
-      <div class="order-1 md:order-2 reveal reveal-d1">
-        <div class="relative aspect-[3/4] overflow-hidden">
+      <!-- Portrait as polaroid — right column, in conversation with the text -->
+      <div class="order-1 md:order-2 flex flex-col items-center reveal reveal-d1">
+        <div class="polaroid-about">
           <img
             src={profileImage}
             alt="Spencer Lane — filmmaker and photographer"
-            class="w-full h-full object-cover"
+            class="polaroid-about-img"
             loading="lazy"
           />
-          <div class="absolute inset-0 ring-1 ring-inset ring-f-ink/8 pointer-events-none" aria-hidden="true"></div>
+          <!-- Field note as polaroid caption -->
+          <p class="polaroid-about-caption">seventeen. still figuring it out.</p>
         </div>
-        <!-- Caption below image -->
-        <p class="font-sans text-xs text-f-gray/60 tracking-wide mt-3">
-          Tyler, TX &mdash; 2025
-        </p>
-        <!-- Field note — director's annotation -->
-        <p class="field-note mt-4 transform -rotate-1 inline-block" aria-label="Field note">
-          seventeen. still figuring it out.
-        </p>
       </div>
 
     </div>
   </div>
 </section>
+
+<style>
+  .polaroid-about {
+    background: #EDE4CF;
+    padding: 14px 14px 56px;
+    box-shadow: 3px 5px 22px rgba(43,40,37,0.16), 0 1px 4px rgba(43,40,37,0.08);
+    transform: rotate(-1.6deg);
+    max-width: 320px;
+    width: 100%;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .polaroid-about:hover {
+    transform: rotate(-0.3deg) scale(1.01);
+  }
+  .polaroid-about-img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    filter: contrast(0.89) saturate(0.78) sepia(0.10) brightness(0.97) !important;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+  .polaroid-about-caption {
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: #6B6357;
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.3;
+  }
+</style>
