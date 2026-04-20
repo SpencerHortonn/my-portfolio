@@ -1,0 +1,225 @@
+---
+// Film opening title card — displays once per session via sessionStorage
+// Dismissed automatically after ~2s or on any scroll/click
+---
+
+<div id="film-opening" role="dialog" aria-label="Film opening title card">
+
+  <!-- Grain overlay inside the opening (grain-wrap is absolute/body, doesn't cover fixed overlay) -->
+  <div class="fo-grain" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <filter id="fo-noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+      </filter>
+      <rect width="100%" height="100%" filter="url(#fo-noise)" opacity="0.22"/>
+    </svg>
+  </div>
+
+  <!-- Film leader countdown — top center -->
+  <div class="fo-countdown-wrap" aria-hidden="true">
+    <div class="fo-countdown-circle">
+      <span id="fo-count" class="fo-count-num">5</span>
+    </div>
+    <!-- Film leader tick marks around the circle -->
+    <div class="fo-leader-marks">
+      {Array.from({length: 12}).map((_, i) => (
+        <div class="fo-tick" style={`transform: rotate(${i * 30}deg)`}></div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Title card — center -->
+  <div class="fo-center">
+    <p class="fo-by">A film by</p>
+    <p class="fo-title">Spencer Lane</p>
+    <div class="fo-slate" aria-label="Film slate metadata">
+      <span>shot in tyler, tx</span>
+      <span class="fo-sep">&mdash;</span>
+      <span>2026</span>
+      <span class="fo-sep">&mdash;</span>
+      <span>35mm</span>
+    </div>
+  </div>
+
+  <!-- Bottom bar — film edge detail -->
+  <div class="fo-bottom" aria-hidden="true">
+    <span class="fo-edge-text">SAFETY &nbsp;&#9632;&nbsp; SAFETY &nbsp;&#9632;&nbsp; SAFETY</span>
+  </div>
+
+</div>
+
+<style>
+  #film-opening {
+    display: none; /* JS shows it on first visit only */
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: #E5DCC8;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    cursor: none;
+  }
+
+  .fo-grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    opacity: 0.5;
+  }
+
+  /* Countdown */
+  .fo-countdown-wrap {
+    position: absolute;
+    top: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fo-countdown-circle {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #BFB39C;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+  .fo-count-num {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 300;
+    color: #6B6357;
+    line-height: 1;
+  }
+  .fo-leader-marks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .fo-tick {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1px;
+    height: 5px;
+    background: #BFB39C;
+    transform-origin: 0 -24px;
+    margin-left: -0.5px;
+    margin-top: -24px;
+    opacity: 0.6;
+  }
+
+  /* Title card */
+  .fo-center {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .fo-by {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 14px;
+    color: #6B6357;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .fo-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    color: #1F1C18;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+  }
+  .fo-slate {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #6B6357;
+    opacity: 0.7;
+  }
+  .fo-sep { opacity: 0.4; }
+
+  /* Bottom edge strip */
+  .fo-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: #2B2825;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .fo-edge-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: #E5DCC8;
+    opacity: 0.35;
+    user-select: none;
+    white-space: nowrap;
+  }
+</style>
+
+<script>
+  const opening = document.getElementById('film-opening');
+  if (!opening) {
+    // component not present
+  } else if (sessionStorage.getItem('film-opened')) {
+    // Return visit — leave display:none as-is
+  } else {
+    sessionStorage.setItem('film-opened', '1');
+    opening.style.display = 'flex';
+
+    // Countdown 5 → 1
+    const countEl = document.getElementById('fo-count');
+    let n = 5;
+    const tick = () => {
+      if (!countEl) return;
+      if (n > 0) {
+        countEl.textContent = String(n);
+        n--;
+        setTimeout(tick, 270);
+      } else {
+        // Fade out
+        dismiss();
+      }
+    };
+    setTimeout(tick, 120);
+
+    function dismiss() {
+      opening.style.transition = 'opacity 0.55s ease';
+      opening.style.opacity = '0';
+      setTimeout(() => { opening.style.display = 'none'; }, 560);
+    }
+
+    // Dismiss on scroll or click
+    window.addEventListener('scroll', dismiss, { once: true, passive: true });
+    window.addEventListener('wheel',  dismiss, { once: true, passive: true });
+    opening.addEventListener('click', dismiss, { once: true });
+  }
+</script>

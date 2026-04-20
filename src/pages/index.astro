@@ -7,19 +7,18 @@ import QuoteInterlude  from '../components/QuoteInterlude.astro';
 import Switzerland     from '../components/Switzerland.astro';
 import WorkWithMe      from '../components/WorkWithMe.astro';
 import Footer          from '../components/Footer.astro';
+import ClosingCard     from '../components/ClosingCard.astro';
 ---
 
 <Layout>
   <Hero />
 
-  <!-- Film tick divider -->
   <div class="film-tick py-2" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span>
   </div>
 
   <About />
 
-  <!-- Film tick divider -->
   <div class="film-tick py-2" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span>
   </div>
@@ -30,7 +29,6 @@ import Footer          from '../components/Footer.astro';
 
   <Switzerland />
 
-  <!-- Film tick divider -->
   <div class="film-tick py-2" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span>
   </div>
@@ -38,4 +36,6 @@ import Footer          from '../components/Footer.astro';
   <WorkWithMe />
 
   <Footer />
+
+  <ClosingCard />
 </Layout>

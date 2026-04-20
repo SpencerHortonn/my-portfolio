@@ -1,5 +1,6 @@
 ---
-import Vine from '../components/Vine.astro';
+import TreeSpine    from '../components/TreeSpine.astro';
+import FilmOpening  from '../components/FilmOpening.astro';
 
 interface Props {
   title?:       string;
@@ -24,7 +25,7 @@ const {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap"
     rel="stylesheet"
   />
 </head>
@@ -32,13 +33,20 @@ const {
 <!--
   body is position:relative — grain-wrap (absolute, first child) fills full
   page height and scrolls with the page like texture printed into the paper.
+  CSS var --scene-bg drives section background transitions.
 -->
-<body class="bg-f-white text-f-ink font-sans antialiased" style="position:relative;">
+<body
+  class="bg-f-white text-f-ink font-sans antialiased"
+  style="position:relative; background-color: var(--scene-bg, #E5DCC8); transition: background-color 0.8s ease;"
+>
 
   <!-- Custom cursor dot -->
   <div id="custom-cursor" aria-hidden="true"></div>
 
-  <!-- Film grain — scrolls with page as first DOM child -->
+  <!-- Film opening — first visit only -->
+  <FilmOpening />
+
+  <!-- Film grain — scrolls with page as first DOM child of body content -->
   <div class="grain-wrap" aria-hidden="true">
     <svg id="grain-svg" xmlns="http://www.w3.org/2000/svg" class="grain-svg">
       <filter id="film-grain" x="0%" y="0%" width="100%" height="100%">
@@ -59,8 +67,8 @@ const {
   <!-- Fixed scratch/dust canvas overlay -->
   <canvas id="scratch-canvas" aria-hidden="true"></canvas>
 
-  <!-- Left-margin vine (desktop ≥ 1400px only) -->
-  <Vine />
+  <!-- Tree spine navigation — desktop left, mobile right vine -->
+  <TreeSpine />
 
   <!-- ── Navigation ── -->
   <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
@@ -109,7 +117,10 @@ const {
   <style is:global>
     html { scroll-behavior: smooth; }
 
-    /* Hide default cursor — custom dot is rendered instead */
+    /* CSS var drives the scene background shifts */
+    :root { --scene-bg: #E5DCC8; }
+
+    /* Hide default cursor — custom dot rendered instead */
     * { cursor: none !important; }
 
     /* ── Custom cursor dot ── */
@@ -122,20 +133,13 @@ const {
       mix-blend-mode: difference;
       pointer-events: none;
       z-index: 9999;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       transform: translate(-50%, -50%);
       transition: width 0.18s ease, height 0.18s ease, opacity 0.2s ease;
       opacity: 0;
     }
     #custom-cursor.visible { opacity: 1; }
     #custom-cursor.hovered { width: 22px; height: 22px; }
-
-    /* ── Warm-paper background ── */
-    body {
-      background-color: #E5DCC8;
-      color: #2B2825;
-    }
 
     /* ── Film grain ── */
     .grain-wrap {
@@ -178,10 +182,14 @@ const {
     /* Film exposure effect on work grid images */
     .work-img {
       filter: contrast(0.91) saturate(0.82) sepia(0.08) brightness(1.55) !important;
-      transition: filter 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease !important;
+      transition: filter 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease,
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
     .work-img.in-view {
       filter: contrast(0.91) saturate(0.82) sepia(0.08) brightness(0.97) !important;
+    }
+    .work-item:hover .work-img {
+      transform: rotate(0.6deg) scale(1.03) !important;
     }
 
     /* Lightbox images: bypass fade-in and grade */
@@ -226,23 +234,12 @@ const {
     #lightbox { transition: opacity 0.25s ease; }
     #lightbox.hidden { opacity: 0; }
 
-    /* ── Image hover: subtle rotation ── */
-    .work-item:hover .work-img {
-      transform: rotate(0.6deg) scale(1.03) !important;
-    }
-    .work-img {
-      transition: filter 1.4s cubic-bezier(0.16, 1, 0.3, 1),
-                  opacity 0.9s ease,
-                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    }
-
     /* ── Film tick section dividers ── */
     .film-tick {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 5px;
-      padding: 0;
       opacity: 0.4;
     }
     .film-tick span {
@@ -263,6 +260,32 @@ const {
       to { stroke-dashoffset: 0; }
     }
 
+    /* ── Field notes ── */
+    .field-note {
+      font-family: 'Caveat', cursive;
+      font-size: 15px;
+      color: #5C5840;
+      opacity: 0.7;
+      line-height: 1.4;
+    }
+
+    /* Olive scribble underline on section headings */
+    .scribble-head {
+      position: relative;
+      display: inline-block;
+    }
+    .scribble-head::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #5C5840;
+      opacity: 0.25;
+      border-radius: 1px;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .grain-wrap { animation: none; opacity: 0.20; }
       .reveal { transition: opacity 0.6s ease !important; transform: none !important; }
@@ -280,7 +303,6 @@ const {
         cursor.style.top  = e.clientY + 'px';
         cursor.classList.add('visible');
       }, { passive: true });
-
       document.querySelectorAll('a, button').forEach(el => {
         el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
         el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
@@ -307,31 +329,26 @@ const {
 
     const GRAIN_INTERVAL = 1000 / 8;
     let lastGrainTime = 0;
-
     function tickGrain(ts: number) {
       requestAnimationFrame(tickGrain);
       if (ts - lastGrainTime < GRAIN_INTERVAL) return;
       lastGrainTime = ts;
       if (grainTurb) grainTurb.setAttribute('seed', String(Math.floor(Math.random() * 9999)));
     }
-
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       requestAnimationFrame(tickGrain);
     }
 
     // ── Scratch & dust canvas ──
-    const canvas  = document.getElementById('scratch-canvas') as HTMLCanvasElement;
-    const ctx     = canvas?.getContext('2d');
-
+    const canvas = document.getElementById('scratch-canvas') as HTMLCanvasElement;
+    const ctx    = canvas?.getContext('2d');
     function drawFilmDamage() {
       if (!canvas || !ctx) return;
       canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 2 thin vertical scratches
       for (let i = 0; i < 2; i++) {
-        const x = (i === 0)
+        const x = i === 0
           ? canvas.width * (0.12 + Math.random() * 0.06)
           : canvas.width * (0.62 + Math.random() * 0.08);
         ctx.beginPath();
@@ -341,21 +358,13 @@ const {
         ctx.lineWidth   = 0.6 + Math.random() * 0.4;
         ctx.stroke();
       }
-
-      // 6 dust specks
       for (let i = 0; i < 6; i++) {
         ctx.beginPath();
-        ctx.arc(
-          Math.random() * canvas.width,
-          Math.random() * canvas.height,
-          0.5 + Math.random() * 1.2,
-          0, Math.PI * 2
-        );
+        ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 0.5 + Math.random() * 1.2, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255,252,245,${0.04 + Math.random() * 0.04})`;
         ctx.fill();
       }
     }
-
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       drawFilmDamage();
       setInterval(drawFilmDamage, 3200);
@@ -366,10 +375,7 @@ const {
     document.querySelectorAll<HTMLImageElement>('img').forEach(img => {
       const mark = () => img.classList.add('img-loaded');
       if (img.complete && img.naturalWidth > 0) mark();
-      else {
-        img.addEventListener('load',  mark);
-        img.addEventListener('error', mark);
-      }
+      else { img.addEventListener('load', mark); img.addEventListener('error', mark); }
     });
 
     // ── Nav scrolled ──
@@ -401,14 +407,53 @@ const {
     // ── Work image film exposure reveal ──
     const imgRo = new IntersectionObserver(
       entries => entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('in-view');
-          imgRo.unobserve(e.target);
-        }
+        if (e.isIntersecting) { e.target.classList.add('in-view'); imgRo.unobserve(e.target); }
       }),
       { threshold: 0.15 }
     );
     document.querySelectorAll('.work-img').forEach(img => imgRo.observe(img));
+
+    // ── Scene background shifts + grain pulse ──
+    // Each section has a subtle mood color that transitions smoothly.
+    const sceneBg: Record<string, string> = {
+      'hero':         '#E5DCC8',
+      'about':        '#E8DCC4',
+      'work':         '#E5DCC8',
+      'switzerland':  '#E2DCCE',
+      'work-with-me': '#E5DCC8',
+    };
+
+    let grainPulseTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function pulseGrain() {
+      if (!grainWrap) return;
+      grainWrap.style.opacity = '0.30';
+      if (grainPulseTimer) clearTimeout(grainPulseTimer);
+      grainPulseTimer = setTimeout(() => {
+        if (grainWrap) grainWrap.style.opacity = '';
+      }, 620);
+    }
+
+    let currentScene = '';
+    const sceneRo = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            const id = (e.target as HTMLElement).id;
+            if (id && id !== currentScene && sceneBg[id]) {
+              currentScene = id;
+              document.body.style.setProperty('--scene-bg', sceneBg[id]);
+              if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) pulseGrain();
+            }
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+    ['hero', 'about', 'work', 'switzerland', 'work-with-me'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) sceneRo.observe(el);
+    });
   </script>
 
 </body>
