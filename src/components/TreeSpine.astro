@@ -1,237 +1,351 @@
 ---
-// Hand-drawn botanical tree spine — left edge (desktop) + right vine (mobile)
+// Botanical tree spine — desktop left (≥1024px) · mobile vine right (<1024px)
 //
-// TRUNK: three overlapping path segments give genuine tapering thickness
-//   base (7px) → mid (5px) → top (3px), all warm bark brown #3D2F1F
-//   Gnarly path with 2–3 hard kinks, not a smooth S-curve.
-//   Grown from the bottom via stroke-dashoffset driven by scroll.
-//   Hidden while hero is in view; fades in as hero scrolls away.
+// BEHAVIOR
+//   1. Trunk + branches SPROUT in one seamless CSS animation when hero scrolls away
+//      (not tied to scroll position — it just grows, then it's done)
+//   2. As the user scrolls the page, flowers + extra branches BLOOM in waves
+//   3. By the page bottom: full tree with dense blossom cluster at base-left
 //
-// BRANCHES: draw in via dashoffset when their section enters the viewport.
-//   Active section branch: stroke-width 2→4px, leaves scale 1→1.2.
-//   Past sections: stay bloomed at base weight.
-//
-// LEAVES: teardrop shapes, bloom one-at-a-time (80ms stagger) after branch draws.
+// ACTIVE SECTION
+//   The branch for the section closest to the viewport center enlarges:
+//   stroke 2→4px, leaves scale 1→1.2. Deactivates when section leaves view.
 ---
 
-<!-- ══ DESKTOP — illustrated tree, fixed left ══ -->
+<!-- ══ DESKTOP ══ -->
 <nav class="tree-desktop" id="tree-spine" aria-label="Page navigation" style="opacity:0;">
+<svg class="tree-svg" viewBox="0 0 170 800" preserveAspectRatio="none"
+     xmlns="http://www.w3.org/2000/svg" aria-hidden="true" overflow="visible">
 
-  <svg
-    class="tree-svg"
-    viewBox="0 0 155 800"
-    preserveAspectRatio="none"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-    overflow="visible"
-  >
-    <!-- ────────────────────────────
-         TRUNK — 3 segments, tapering:
-         base 7px · mid 5px · top 3px
-         Paths run BOTTOM→TOP so
-         dashoffset animation grows up.
-         Gnarly bends at ≈y580, ≈y315.
-    ──────────────────────────────── -->
+  <!-- ─────────────────────────────────────────
+       ROOT TENDRILS — spread from base
+       Revealed in wave 1 (scroll begins)
+  ──────────────────────────────────────────── -->
+  <path class="extra-branch w1 s4"
+    d="M28,796 C18,798 8,800 2,800"
+    stroke="#3D2F1F" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+  <path class="extra-branch w1 s6"
+    d="M38,798 C50,800 62,800 70,800"
+    stroke="#3D2F1F" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path class="extra-branch w1 s8"
+    d="M24,800 C14,800 4,800 0,798"
+    stroke="#3D2F1F" stroke-width="1.4" fill="none" stroke-linecap="round"/>
 
-    <!-- Bark texture — single sinuous full-length path, very thin -->
-    <path id="trunk-bark"
-      d="M31,792
-         C33,750 27,706 31,662
-         C35,618 43,574 35,530
-         C28,486 30,446 28,404
-         C26,362 21,320 28,280
-         C35,240 39,200 35,158
-         C31,116 27,76 32,40
-         C37,16 36,10 37,8"
-      stroke="#3D2F1F" stroke-width="0.7" fill="none" stroke-linecap="round" opacity="0.55"
-    />
+  <!-- ─────────────────────────────────────────
+       TRUNK — 3 segments, tapering base→top
+       Bark texture overlay for rough feel.
+       All run BOTTOM→TOP (dashoffset grows up).
+       Gnarly kinks at ≈y520 and ≈y265.
+  ──────────────────────────────────────────── -->
 
-    <!-- Segment A — base (y 792→522), thickest -->
-    <path id="trunk-a"
-      d="M34,792
-         C36,754 29,716 33,676
-         C37,636 44,596 37,560
-         C30,524 34,520 32,518"
-      stroke="#3D2F1F" stroke-width="7" fill="none" stroke-linecap="round"
-    />
+  <!-- Bark texture — sinuous, very thin -->
+  <path id="trunk-bark"
+    d="M31,794 C33,752 27,708 31,664
+       C35,620 43,576 35,532
+       C27,488 30,448 28,406
+       C26,364 21,322 28,282
+       C35,242 39,202 35,160
+       C31,118 27,78 32,42
+       C37,16 36,10 37,8"
+    stroke="#3D2F1F" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.5"/>
 
-    <!-- Segment B — mid (y 518→285), medium -->
-    <path id="trunk-b"
-      d="M32,518
-         C29,492 34,454 31,418
-         C28,382 22,342 28,308
-         C34,274 40,270 36,262"
-      stroke="#3D2F1F" stroke-width="5" fill="none" stroke-linecap="round"
-    />
+  <!-- Segment A — base (y 794→520), 7px -->
+  <path id="trunk-a"
+    d="M34,794
+       C36,756 29,718 33,678
+       C37,638 44,598 37,562
+       C30,526 34,522 32,520"
+    stroke="#3D2F1F" stroke-width="7" fill="none" stroke-linecap="round"/>
 
-    <!-- Segment C — top (y 262→8), thinnest -->
-    <path id="trunk-c"
-      d="M36,262
-         C32,234 38,200 35,166
-         C32,132 28,96 33,62
-         C38,32 36,18 38,8"
-      stroke="#3D2F1F" stroke-width="3" fill="none" stroke-linecap="round"
-    />
+  <!-- Segment B — mid (y 520→265), 4.5px -->
+  <path id="trunk-b"
+    d="M32,520
+       C29,494 35,456 31,420
+       C27,384 21,344 28,308
+       C35,272 40,268 36,265"
+    stroke="#3D2F1F" stroke-width="4.5" fill="none" stroke-linecap="round"/>
 
-    <!-- Twig nubs — organic dead-branch stubs -->
-    <!-- These fade in as the trunk grows; no individual animation needed -->
-    <path class="twig-nub" d="M33,670 C40,665 46,659 44,654" stroke="#3D2F1F" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path class="twig-nub" d="M31,510 C38,514 44,520 42,526" stroke="#3D2F1F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-    <path class="twig-nub" d="M29,348 C36,343 42,338 40,332" stroke="#3D2F1F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    <path class="twig-nub" d="M34,182 C41,186 46,191 44,197" stroke="#3D2F1F" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- Segment C — top (y 265→8), 2.8px -->
+  <path id="trunk-c"
+    d="M36,265
+       C32,237 38,203 35,168
+       C32,133 28,97 33,63
+       C38,33 36,18 38,8"
+    stroke="#3D2F1F" stroke-width="2.8" fill="none" stroke-linecap="round"/>
 
-    <!-- ────────────────────────
-         BRANCH 1 — "about"
-         attaches at trunk ≈ y=165
-    ──────────────────────────── -->
-    <g class="branch-group" id="branch-about">
-      <!-- Main branch — sweeping rightward curve -->
-      <path class="branch-line-main"
-        d="M37,165 C58,162 88,153 115,148"
-        stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <!-- Sub-branch up -->
-      <path class="branch-line-sub"
-        d="M115,148 C122,143 128,135 125,129"
-        stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-      <!-- Sub-branch down -->
-      <path class="branch-line-sub"
-        d="M115,148 C121,152 126,157 122,164"
-        stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  <!-- Twig nubs -->
+  <path class="twig-nub"  d="M33,672 C40,667 46,661 44,655" stroke="#3D2F1F" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path class="twig-nub"  d="M31,512 C38,516 44,522 42,528" stroke="#3D2F1F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path class="twig-nub"  d="M29,350 C36,345 42,340 40,334" stroke="#3D2F1F" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+  <path class="twig-nub"  d="M34,184 C41,188 46,193 44,199" stroke="#3D2F1F" stroke-width="1.1" fill="none" stroke-linecap="round"/>
 
-      <!-- Leaves: upper cluster (around 125, 129) -->
-      <g transform="translate(125,129) rotate(-38)">
-        <g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(125,129) rotate(2)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(125,129) rotate(34)">
-        <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <!-- Leaves: lower cluster (around 122, 164) -->
-      <g transform="translate(122,164) rotate(-18)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(122,164) rotate(22)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10 0,-12 C3,-10 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-    </g>
+  <!-- ─────────────────────────────────────────
+       EXTRA BRANCHES — revealed on scroll
+  ──────────────────────────────────────────── -->
+  <!-- Left spur, low (wave 2) -->
+  <path class="extra-branch w2 s2"
+    d="M30,542 C22,538 14,532 10,526"
+    stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  <!-- Right spur, mid (wave 2) -->
+  <path class="extra-branch w2 s5"
+    d="M34,468 C42,463 49,457 46,451"
+    stroke="#5C5840" stroke-width="1.0" fill="none" stroke-linecap="round"/>
+  <!-- Upper spur near "about" (wave 3) -->
+  <path class="extra-branch w3 s3"
+    d="M38,142 C45,136 52,130 49,124"
+    stroke="#5C5840" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+  <!-- Upper-right spur (wave 4) -->
+  <path class="extra-branch w4 s1"
+    d="M37,88 C46,82 54,77 51,71"
+    stroke="#5C5840" stroke-width="0.8" fill="none" stroke-linecap="round"/>
 
-    <!-- ────────────────────────
-         BRANCH 2 — "work"
-         attaches at trunk ≈ y=322
-    ──────────────────────────── -->
-    <g class="branch-group" id="branch-work">
-      <path class="branch-line-main"
-        d="M35,322 C56,319 85,310 110,305"
-        stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path class="branch-line-sub"
-        d="M110,305 C117,300 123,292 120,286"
-        stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-      <path class="branch-line-sub"
-        d="M110,305 C117,308 122,314 118,321"
-        stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  <!-- ─────────────────────────────────────────
+       BRANCH 1 — "about"  (trunk y ≈ 165)
+  ──────────────────────────────────────────── -->
+  <g class="branch-group" id="branch-about">
+    <path class="branch-line-main"
+      d="M37,165 C58,162 88,153 115,148"
+      stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path class="branch-line-sub"
+      d="M115,148 C122,143 128,135 125,129"
+      stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path class="branch-line-sub"
+      d="M115,148 C121,152 126,157 122,164"
+      stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+    <!-- Leaves -->
+    <g transform="translate(125,129) rotate(-38)"><g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(125,129) rotate(2)"><g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(125,129) rotate(34)"><g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(122,164) rotate(-18)"><g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(122,164) rotate(22)"><g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10 0,-12 C3,-10 4,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+  </g>
 
-      <g transform="translate(120,286) rotate(-42)">
-        <g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(120,286) rotate(-8)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(120,286) rotate(28)">
-        <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(118,321) rotate(-12)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(118,321) rotate(24)">
-        <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-    </g>
+  <!-- ─────────────────────────────────────────
+       BRANCH 2 — "work"  (trunk y ≈ 322)
+  ──────────────────────────────────────────── -->
+  <g class="branch-group" id="branch-work">
+    <path class="branch-line-main"
+      d="M35,322 C56,319 85,310 110,305"
+      stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path class="branch-line-sub"
+      d="M110,305 C117,300 123,292 120,286"
+      stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path class="branch-line-sub"
+      d="M110,305 C117,308 122,314 118,321"
+      stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+    <g transform="translate(120,286) rotate(-42)"><g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(120,286) rotate(-8)"><g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(120,286) rotate(28)"><g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(118,321) rotate(-12)"><g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(118,321) rotate(24)"><g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+  </g>
 
-    <!-- ────────────────────────
-         BRANCH 3 — "switzerland"
-         attaches at trunk ≈ y=482
-    ──────────────────────────── -->
-    <g class="branch-group" id="branch-switzerland">
-      <path class="branch-line-main"
-        d="M34,482 C55,479 83,470 108,465"
-        stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path class="branch-line-sub"
-        d="M108,465 C115,460 121,452 118,446"
-        stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-      <path class="branch-line-sub"
-        d="M108,465 C114,468 120,475 116,482"
-        stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  <!-- ─────────────────────────────────────────
+       BRANCH 3 — "switzerland"  (trunk y ≈ 482)
+  ──────────────────────────────────────────── -->
+  <g class="branch-group" id="branch-switzerland">
+    <path class="branch-line-main"
+      d="M34,482 C55,479 83,470 108,465"
+      stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path class="branch-line-sub"
+      d="M108,465 C115,460 121,452 118,446"
+      stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path class="branch-line-sub"
+      d="M108,465 C114,468 120,475 116,482"
+      stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+    <g transform="translate(118,446) rotate(-40)"><g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(118,446) rotate(-5)"><g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(118,446) rotate(30)"><g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(116,482) rotate(-20)"><g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(116,482) rotate(18)"><g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+  </g>
 
-      <g transform="translate(118,446) rotate(-40)">
-        <g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(118,446) rotate(-5)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(118,446) rotate(30)">
-        <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(116,482) rotate(-20)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(116,482) rotate(18)">
-        <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-    </g>
+  <!-- ─────────────────────────────────────────
+       BRANCH 4 — "work with me"  (trunk y ≈ 643)
+  ──────────────────────────────────────────── -->
+  <g class="branch-group" id="branch-work-with-me">
+    <path class="branch-line-main"
+      d="M33,643 C54,640 82,631 107,626"
+      stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path class="branch-line-sub"
+      d="M107,626 C114,621 120,613 117,607"
+      stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <path class="branch-line-sub"
+      d="M107,626 C113,630 118,636 114,643"
+      stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+    <g transform="translate(117,607) rotate(-36)"><g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(117,607) rotate(0)"><g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(117,607) rotate(32)"><g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(114,643) rotate(-14)"><g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g></g>
+    <g transform="translate(114,643) rotate(26)"><g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g></g>
+  </g>
 
-    <!-- ────────────────────────
-         BRANCH 4 — "work with me"
-         attaches at trunk ≈ y=643
-    ──────────────────────────── -->
-    <g class="branch-group" id="branch-work-with-me">
-      <path class="branch-line-main"
-        d="M33,643 C54,640 82,631 107,626"
-        stroke="#5C5840" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path class="branch-line-sub"
-        d="M107,626 C114,621 120,613 117,607"
-        stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-      <path class="branch-line-sub"
-        d="M107,626 C113,630 118,636 114,643"
-        stroke="#5C5840" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+  <!-- ─────────────────────────────────────────
+       BLOSSOMS — 5-petal plum flowers
+       Revealed in scroll waves 1–4.
+       Macro petal: circle at r=5 from center.
+       Petals at 5 compass positions, r=3.5 each.
+       Center r=2.4, warm gold.
+       Dense cluster at base (wave 1).
+  ──────────────────────────────────────────── -->
 
-      <g transform="translate(117,607) rotate(-36)">
-        <g class="leaf-scale"><path d="M0,0 C-4.5,-3 -3.5,-11.5 0,-13.5 C3.5,-11.5 4.5,-3 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(117,607) rotate(0)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-2.5 -3,-10.5 0,-12.5 C3,-10.5 4,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(117,607) rotate(32)">
-        <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(114,643) rotate(-14)">
-        <g class="leaf-scale"><path d="M0,0 C-4,-3 -3.5,-11 0,-13 C3.5,-11 4,-3 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-      <g transform="translate(114,643) rotate(26)">
-        <g class="leaf-scale"><path d="M0,0 C-3.5,-2.5 -3,-10 0,-12 C3,-10 3.5,-2.5 0,0Z" fill="#7B7A4E"/></g>
-      </g>
-    </g>
+  <!-- WAVE 1 — base cluster (large blossoms, bottom-left) -->
+  <g class="blossom w1 s1 bl-lg" transform="translate(18,764) rotate(12)">
+    <circle cx="0" cy="-5.5" r="4" fill="#D4A8A0"/><circle cx="5.2" cy="-1.7" r="4" fill="#D4A8A0"/>
+    <circle cx="3.2" cy="4.5" r="4" fill="#C99A92"/><circle cx="-3.2" cy="4.5" r="4" fill="#D4A8A0"/>
+    <circle cx="-5.2" cy="-1.7" r="4" fill="#C99A92"/><circle cx="0" cy="0" r="2.8" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w1 s3 bl-lg" transform="translate(7,748) rotate(-8)">
+    <circle cx="0" cy="-5.5" r="3.8" fill="#C99A92"/><circle cx="5.2" cy="-1.7" r="3.8" fill="#D4A8A0"/>
+    <circle cx="3.2" cy="4.5" r="3.8" fill="#D4A8A0"/><circle cx="-3.2" cy="4.5" r="3.8" fill="#C99A92"/>
+    <circle cx="-5.2" cy="-1.7" r="3.8" fill="#D4A8A0"/><circle cx="0" cy="0" r="2.6" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w1 s5 bl-lg" transform="translate(36,758) rotate(22)">
+    <circle cx="0" cy="-5" r="3.5" fill="#D4A8A0"/><circle cx="4.8" cy="-1.5" r="3.5" fill="#D4A8A0"/>
+    <circle cx="3" cy="4" r="3.5" fill="#C99A92"/><circle cx="-3" cy="4" r="3.5" fill="#D4A8A0"/>
+    <circle cx="-4.8" cy="-1.5" r="3.5" fill="#C99A92"/><circle cx="0" cy="0" r="2.4" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w1 s2 bl-md" transform="translate(14,738) rotate(-15)">
+    <circle cx="0" cy="-4.5" r="3" fill="#D4A8A0"/><circle cx="4.3" cy="-1.4" r="3" fill="#C99A92"/>
+    <circle cx="2.6" cy="3.6" r="3" fill="#D4A8A0"/><circle cx="-2.6" cy="3.6" r="3" fill="#D4A8A0"/>
+    <circle cx="-4.3" cy="-1.4" r="3" fill="#C99A92"/><circle cx="0" cy="0" r="2.1" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w1 s6 bl-md" transform="translate(48,744) rotate(5)">
+    <circle cx="0" cy="-4.5" r="3" fill="#C99A92"/><circle cx="4.3" cy="-1.4" r="3" fill="#D4A8A0"/>
+    <circle cx="2.6" cy="3.6" r="3" fill="#D4A8A0"/><circle cx="-2.6" cy="3.6" r="3" fill="#C99A92"/>
+    <circle cx="-4.3" cy="-1.4" r="3" fill="#D4A8A0"/><circle cx="0" cy="0" r="2.1" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w1 s4 bl-sm" transform="translate(25,778) rotate(30)">
+    <circle cx="0" cy="-3.8" r="2.5" fill="#D4A8A0"/><circle cx="3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/>
+    <circle cx="2.2" cy="3" r="2.5" fill="#D4A8A0"/><circle cx="-2.2" cy="3" r="2.5" fill="#C99A92"/>
+    <circle cx="-3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.8" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w1 s7 bl-sm" transform="translate(8,788) rotate(-5)">
+    <circle cx="0" cy="-3.8" r="2.5" fill="#C99A92"/><circle cx="3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/>
+    <circle cx="2.2" cy="3" r="2.5" fill="#D4A8A0"/><circle cx="-2.2" cy="3" r="2.5" fill="#D4A8A0"/>
+    <circle cx="-3.6" cy="-1.2" r="2.5" fill="#C99A92"/><circle cx="0" cy="0" r="1.8" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w1 s8 bl-sm" transform="translate(58,754) rotate(18)">
+    <circle cx="0" cy="-3.8" r="2.5" fill="#D4A8A0"/><circle cx="3.6" cy="-1.2" r="2.5" fill="#C99A92"/>
+    <circle cx="2.2" cy="3" r="2.5" fill="#D4A8A0"/><circle cx="-2.2" cy="3" r="2.5" fill="#D4A8A0"/>
+    <circle cx="-3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.8" fill="#E8C49A"/>
+  </g>
 
-  </svg>
+  <!-- WAVE 2 — lower branches + mid-trunk -->
+  <g class="blossom w2 s1" transform="translate(130,600) rotate(10)">
+    <circle cx="0" cy="-4.5" r="3" fill="#D4A8A0"/><circle cx="4.3" cy="-1.4" r="3" fill="#D4A8A0"/>
+    <circle cx="2.6" cy="3.6" r="3" fill="#C99A92"/><circle cx="-2.6" cy="3.6" r="3" fill="#D4A8A0"/>
+    <circle cx="-4.3" cy="-1.4" r="3" fill="#C99A92"/><circle cx="0" cy="0" r="2.1" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w2 s3" transform="translate(120,622) rotate(-12)">
+    <circle cx="0" cy="-4" r="2.8" fill="#D4A8A0"/><circle cx="3.8" cy="-1.2" r="2.8" fill="#C99A92"/>
+    <circle cx="2.4" cy="3.2" r="2.8" fill="#D4A8A0"/><circle cx="-2.4" cy="3.2" r="2.8" fill="#D4A8A0"/>
+    <circle cx="-3.8" cy="-1.2" r="2.8" fill="#D4A8A0"/><circle cx="0" cy="0" r="2" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w2 s5" transform="translate(105,648) rotate(25)">
+    <circle cx="0" cy="-3.8" r="2.5" fill="#C99A92"/><circle cx="3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/>
+    <circle cx="2.2" cy="3" r="2.5" fill="#D4A8A0"/><circle cx="-2.2" cy="3" r="2.5" fill="#D4A8A0"/>
+    <circle cx="-3.6" cy="-1.2" r="2.5" fill="#C99A92"/><circle cx="0" cy="0" r="1.8" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w2 s2" transform="translate(22,548) rotate(-20)">
+    <circle cx="0" cy="-4" r="2.7" fill="#D4A8A0"/><circle cx="3.8" cy="-1.2" r="2.7" fill="#D4A8A0"/>
+    <circle cx="2.3" cy="3.2" r="2.7" fill="#C99A92"/><circle cx="-2.3" cy="3.2" r="2.7" fill="#D4A8A0"/>
+    <circle cx="-3.8" cy="-1.2" r="2.7" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.9" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w2 s6" transform="translate(18,498) rotate(8)">
+    <circle cx="0" cy="-3.8" r="2.5" fill="#C99A92"/><circle cx="3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/>
+    <circle cx="2.2" cy="3" r="2.5" fill="#D4A8A0"/><circle cx="-2.2" cy="3" r="2.5" fill="#C99A92"/>
+    <circle cx="-3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.8" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w2 s4" transform="translate(130,458) rotate(-8)">
+    <circle cx="0" cy="-4" r="2.8" fill="#D4A8A0"/><circle cx="3.8" cy="-1.2" r="2.8" fill="#D4A8A0"/>
+    <circle cx="2.4" cy="3.2" r="2.8" fill="#D4A8A0"/><circle cx="-2.4" cy="3.2" r="2.8" fill="#C99A92"/>
+    <circle cx="-3.8" cy="-1.2" r="2.8" fill="#D4A8A0"/><circle cx="0" cy="0" r="2" fill="#E8C49A"/>
+  </g>
 
-  <!-- Clickable handwritten labels — HTML overlaid, visible ≥ 1440px only -->
-  <a href="#about"        class="tree-label" data-label-for="about"        style="top:20.6%" aria-label="About">about</a>
-  <a href="#work"         class="tree-label" data-label-for="work"         style="top:40.3%" aria-label="Work">work</a>
-  <a href="#switzerland"  class="tree-label" data-label-for="switzerland"  style="top:60.3%" aria-label="Switzerland">switzerland</a>
-  <a href="#work-with-me" class="tree-label" data-label-for="work-with-me" style="top:80.4%" aria-label="Work with me">work with me</a>
+  <!-- WAVE 3 — work branch area -->
+  <g class="blossom w3 s2" transform="translate(122,470) rotate(15)">
+    <circle cx="0" cy="-4" r="2.8" fill="#D4A8A0"/><circle cx="3.8" cy="-1.2" r="2.8" fill="#C99A92"/>
+    <circle cx="2.4" cy="3.2" r="2.8" fill="#D4A8A0"/><circle cx="-2.4" cy="3.2" r="2.8" fill="#D4A8A0"/>
+    <circle cx="-3.8" cy="-1.2" r="2.8" fill="#D4A8A0"/><circle cx="0" cy="0" r="2" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w3 s4" transform="translate(112,492) rotate(-18)">
+    <circle cx="0" cy="-3.8" r="2.5" fill="#D4A8A0"/><circle cx="3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/>
+    <circle cx="2.2" cy="3" r="2.5" fill="#C99A92"/><circle cx="-2.2" cy="3" r="2.5" fill="#D4A8A0"/>
+    <circle cx="-3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.8" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w3 s1" transform="translate(130,276) rotate(22)">
+    <circle cx="0" cy="-4" r="2.8" fill="#C99A92"/><circle cx="3.8" cy="-1.2" r="2.8" fill="#D4A8A0"/>
+    <circle cx="2.4" cy="3.2" r="2.8" fill="#D4A8A0"/><circle cx="-2.4" cy="3.2" r="2.8" fill="#C99A92"/>
+    <circle cx="-3.8" cy="-1.2" r="2.8" fill="#D4A8A0"/><circle cx="0" cy="0" r="2" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w3 s5" transform="translate(120,297) rotate(-5)">
+    <circle cx="0" cy="-3.8" r="2.5" fill="#D4A8A0"/><circle cx="3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/>
+    <circle cx="2.2" cy="3" r="2.5" fill="#D4A8A0"/><circle cx="-2.2" cy="3" r="2.5" fill="#C99A92"/>
+    <circle cx="-3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.8" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w3 s3" transform="translate(108,322) rotate(10)">
+    <circle cx="0" cy="-3.5" r="2.3" fill="#D4A8A0"/><circle cx="3.3" cy="-1.1" r="2.3" fill="#C99A92"/>
+    <circle cx="2" cy="2.8" r="2.3" fill="#D4A8A0"/><circle cx="-2" cy="2.8" r="2.3" fill="#D4A8A0"/>
+    <circle cx="-3.3" cy="-1.1" r="2.3" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.6" fill="#E8C49A"/>
+  </g>
+
+  <!-- WAVE 4 — upper tree + final base blooms -->
+  <g class="blossom w4 s1" transform="translate(130,120) rotate(-10)">
+    <circle cx="0" cy="-4" r="2.8" fill="#D4A8A0"/><circle cx="3.8" cy="-1.2" r="2.8" fill="#D4A8A0"/>
+    <circle cx="2.4" cy="3.2" r="2.8" fill="#C99A92"/><circle cx="-2.4" cy="3.2" r="2.8" fill="#D4A8A0"/>
+    <circle cx="-3.8" cy="-1.2" r="2.8" fill="#D4A8A0"/><circle cx="0" cy="0" r="2" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w4 s3" transform="translate(120,143) rotate(20)">
+    <circle cx="0" cy="-3.8" r="2.5" fill="#C99A92"/><circle cx="3.6" cy="-1.2" r="2.5" fill="#D4A8A0"/>
+    <circle cx="2.2" cy="3" r="2.5" fill="#D4A8A0"/><circle cx="-2.2" cy="3" r="2.5" fill="#D4A8A0"/>
+    <circle cx="-3.6" cy="-1.2" r="2.5" fill="#C99A92"/><circle cx="0" cy="0" r="1.8" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w4 s5" transform="translate(110,168) rotate(-25)">
+    <circle cx="0" cy="-3.5" r="2.3" fill="#D4A8A0"/><circle cx="3.3" cy="-1.1" r="2.3" fill="#D4A8A0"/>
+    <circle cx="2" cy="2.8" r="2.3" fill="#D4A8A0"/><circle cx="-2" cy="2.8" r="2.3" fill="#C99A92"/>
+    <circle cx="-3.3" cy="-1.1" r="2.3" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.6" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w4 s2" transform="translate(16,112) rotate(5)">
+    <circle cx="0" cy="-3.5" r="2.3" fill="#D4A8A0"/><circle cx="3.3" cy="-1.1" r="2.3" fill="#C99A92"/>
+    <circle cx="2" cy="2.8" r="2.3" fill="#D4A8A0"/><circle cx="-2" cy="2.8" r="2.3" fill="#D4A8A0"/>
+    <circle cx="-3.3" cy="-1.1" r="2.3" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.6" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w4 s6" transform="translate(23,80) rotate(-12)">
+    <circle cx="0" cy="-3" r="2" fill="#D4A8A0"/><circle cx="2.9" cy="-0.9" r="2" fill="#D4A8A0"/>
+    <circle cx="1.8" cy="2.5" r="2" fill="#C99A92"/><circle cx="-1.8" cy="2.5" r="2" fill="#D4A8A0"/>
+    <circle cx="-2.9" cy="-0.9" r="2" fill="#D4A8A0"/><circle cx="0" cy="0" r="1.4" fill="#E8C49A"/>
+  </g>
+  <!-- Extra base blossoms — densify ground at full scroll -->
+  <g class="blossom w4 s4 bl-lg" transform="translate(60,762) rotate(35)">
+    <circle cx="0" cy="-5" r="3.5" fill="#D4A8A0"/><circle cx="4.8" cy="-1.5" r="3.5" fill="#C99A92"/>
+    <circle cx="3" cy="4" r="3.5" fill="#D4A8A0"/><circle cx="-3" cy="4" r="3.5" fill="#D4A8A0"/>
+    <circle cx="-4.8" cy="-1.5" r="3.5" fill="#C99A92"/><circle cx="0" cy="0" r="2.4" fill="#E8C49A"/>
+  </g>
+  <g class="blossom w4 s7 bl-md" transform="translate(30,792) rotate(-28)">
+    <circle cx="0" cy="-4.5" r="3" fill="#C99A92"/><circle cx="4.3" cy="-1.4" r="3" fill="#D4A8A0"/>
+    <circle cx="2.6" cy="3.6" r="3" fill="#D4A8A0"/><circle cx="-2.6" cy="3.6" r="3" fill="#D4A8A0"/>
+    <circle cx="-4.3" cy="-1.4" r="3" fill="#C99A92"/><circle cx="0" cy="0" r="2.1" fill="#E8C49A"/>
+  </g>
+
+</svg>
+
+<!-- Clickable handwritten labels — visible ≥ 1440px -->
+<a href="#about"        class="tree-label" data-label-for="about"        style="top:20.6%" aria-label="About">about</a>
+<a href="#work"         class="tree-label" data-label-for="work"         style="top:40.3%" aria-label="Work">work</a>
+<a href="#switzerland"  class="tree-label" data-label-for="switzerland"  style="top:60.3%" aria-label="Switzerland">switzerland</a>
+<a href="#work-with-me" class="tree-label" data-label-for="work-with-me" style="top:80.4%" aria-label="Work with me">work with me</a>
 </nav>
 
 
-<!-- ══ MOBILE — thin vine, right edge, dot markers ══ -->
+<!-- ══ MOBILE — thin vine right edge ══ -->
 <div class="tree-mobile" id="tree-mobile" aria-hidden="true" style="opacity:0;">
   <svg viewBox="0 0 18 800" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Vine grows bottom → top -->
     <path id="mobile-vine"
-      d="M9,800 C8.5,780 5,740 7,680 C9,620 5.5,560 7.5,500 C9.5,440 6,380 8,320 C10,260 6.5,200 8.5,140 C10.5,80 7.5,40 9,0"
-      stroke="#5C5840" stroke-width="1.2" fill="none" stroke-linecap="round"
-    />
-    <!-- Dot markers at same y% as desktop branches -->
+      d="M9,800 C8.5,780 5,740 7,680 C9,620 5.5,560 7.5,500
+         C9.5,440 6,380 8,320 C10,260 6.5,200 8.5,140
+         C10.5,80 7.5,40 9,0"
+      stroke="#5C5840" stroke-width="1.4" fill="none" stroke-linecap="round"/>
     <g class="mobile-dot" id="mdot-about"        data-section="about">
       <circle cx="9" cy="165" r="3" fill="none" stroke="#5C5840" stroke-width="1"/>
       <circle class="dot-fill" cx="9" cy="165" r="1.6" fill="#5C5840"/>
@@ -248,78 +362,177 @@
       <circle cx="9" cy="643" r="3" fill="none" stroke="#5C5840" stroke-width="1"/>
       <circle class="dot-fill" cx="9" cy="643" r="1.6" fill="#5C5840"/>
     </g>
+    <!-- Small blossom markers on mobile vine at wave thresholds -->
+    <circle class="mobile-blossom mb-w1" cx="9" cy="775" r="4" fill="#D4A8A0" opacity="0"/>
+    <circle class="mobile-blossom mb-w2" cx="9" cy="620" r="3" fill="#D4A8A0" opacity="0"/>
+    <circle class="mobile-blossom mb-w3" cx="9" cy="450" r="2.5" fill="#D4A8A0" opacity="0"/>
+    <circle class="mobile-blossom mb-w4" cx="9" cy="140" r="2" fill="#D4A8A0" opacity="0"/>
   </svg>
 </div>
 
 
 <style>
-  /* ══ Container ══ */
+  /* ══ Containers ══ */
   .tree-desktop {
     display: none;
     position: fixed;
     left: 6px;
     top: 72px;
-    width: 155px;
+    width: 170px;
     height: calc(100vh - 72px - 28px);
     pointer-events: none;
     z-index: 20;
-    transition: opacity 0.4s ease;
+    /* Opacity driven by JS */
   }
   @media (min-width: 1024px) { .tree-desktop { display: block; } }
-
   .tree-svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
-  /* ── Trunk segments — dashoffset set by JS scroll ──
-     Start at their full length (invisible); JS reduces to 0. */
+  /* ── Trunk: dashoffset set by JS, then CSS animation draws them in ── */
   #trunk-a, #trunk-b, #trunk-c, #trunk-bark {
-    stroke-dasharray: 800; /* generous; JS sets exact value */
-    stroke-dashoffset: 800;
-  }
-  .twig-nub {
-    opacity: 0;
-    transition: opacity 0.6s ease;
+    /* JS sets strokeDasharray = strokeDashoffset = pathLength */
   }
 
-  /* ── Branch lines — draw in on bloom ── */
+  /* ── Sprout: CSS animations triggered by .sprouting class ── */
+
+  /* Trunk segments grow from bottom to top */
+  .tree-desktop.sprouting #trunk-a {
+    animation: draw-in 1.0s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+  }
+  .tree-desktop.sprouting #trunk-b {
+    animation: draw-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+  }
+  .tree-desktop.sprouting #trunk-c {
+    animation: draw-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards;
+  }
+  .tree-desktop.sprouting #trunk-bark {
+    animation: draw-in 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+  }
+
+  /* Twig nubs fade in as trunk grows */
+  .twig-nub { opacity: 0; transition: opacity 0.6s ease; }
+  .tree-desktop.sprouting .twig-nub:nth-child(1) { animation: nub-in 0.4s ease 0.6s forwards; }
+  .tree-desktop.sprouting .twig-nub:nth-child(2) { animation: nub-in 0.4s ease 1.0s forwards; }
+  .tree-desktop.sprouting .twig-nub:nth-child(3) { animation: nub-in 0.4s ease 1.4s forwards; }
+  .tree-desktop.sprouting .twig-nub:nth-child(4) { animation: nub-in 0.4s ease 1.8s forwards; }
+
+  /* Branches draw in after trunk reaches their height */
   .branch-line-main {
     stroke-dasharray: 200;
     stroke-dashoffset: 200;
     stroke-width: 2px;
-    transition:
-      stroke-dashoffset 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-      stroke-width 0.6s ease;
+    transition: stroke-width 0.6s ease;
   }
   .branch-line-sub {
     stroke-dasharray: 130;
     stroke-dashoffset: 130;
-    transition:
-      stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.35s,
-      stroke-width 0.6s ease;
   }
-  .branch-group.bloomed .branch-line-main { stroke-dashoffset: 0; }
-  .branch-group.bloomed .branch-line-sub  { stroke-dashoffset: 0; }
+  /* Branch 4 (work-with-me, lowest) draws first */
+  .tree-desktop.sprouting #branch-work-with-me .branch-line-main {
+    animation: draw-in 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+  }
+  .tree-desktop.sprouting #branch-work-with-me .branch-line-sub {
+    animation: draw-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+  }
+  /* Branch 3 (switzerland) */
+  .tree-desktop.sprouting #branch-switzerland .branch-line-main {
+    animation: draw-in 0.62s cubic-bezier(0.16, 1, 0.3, 1) 1.1s forwards;
+  }
+  .tree-desktop.sprouting #branch-switzerland .branch-line-sub {
+    animation: draw-in 0.48s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards;
+  }
+  /* Branch 2 (work) */
+  .tree-desktop.sprouting #branch-work .branch-line-main {
+    animation: draw-in 0.60s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
+  }
+  .tree-desktop.sprouting #branch-work .branch-line-sub {
+    animation: draw-in 0.46s cubic-bezier(0.16, 1, 0.3, 1) 1.8s forwards;
+  }
+  /* Branch 1 (about, highest) draws last */
+  .tree-desktop.sprouting #branch-about .branch-line-main {
+    animation: draw-in 0.58s cubic-bezier(0.16, 1, 0.3, 1) 1.7s forwards;
+  }
+  .tree-desktop.sprouting #branch-about .branch-line-sub {
+    animation: draw-in 0.44s cubic-bezier(0.16, 1, 0.3, 1) 2.1s forwards;
+  }
 
-  /* ── Active branch — currently in view ── */
+  @keyframes draw-in       { to { stroke-dashoffset: 0; } }
+  @keyframes nub-in        { to { opacity: 0.55; } }
+
+  /* Extra branches draw on scroll waves (same mechanism) */
+  .extra-branch {
+    stroke-dasharray: 80;
+    stroke-dashoffset: 80;
+  }
+  /* Root tendrils: wave 1 */
+  .tree-desktop.wave-1 .extra-branch.w1.s2 { animation: draw-in 0.6s ease 0.1s forwards; }
+  .tree-desktop.wave-1 .extra-branch.w1.s4 { animation: draw-in 0.6s ease 0.32s forwards; }
+  .tree-desktop.wave-1 .extra-branch.w1.s6 { animation: draw-in 0.6s ease 0.55s forwards; }
+  .tree-desktop.wave-1 .extra-branch.w1.s8 { animation: draw-in 0.6s ease 0.76s forwards; }
+  /* Wave 2 */
+  .tree-desktop.wave-2 .extra-branch.w2.s2 { animation: draw-in 0.55s ease 0.1s forwards; }
+  .tree-desktop.wave-2 .extra-branch.w2.s5 { animation: draw-in 0.55s ease 0.36s forwards; }
+  /* Wave 3 */
+  .tree-desktop.wave-3 .extra-branch.w3.s3 { animation: draw-in 0.5s ease 0.2s forwards; }
+  /* Wave 4 */
+  .tree-desktop.wave-4 .extra-branch.w4.s1 { animation: draw-in 0.45s ease 0.1s forwards; }
+
+  /* ── Leaves ── */
+  .leaf-scale {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(0.2);
+    opacity: 0.1;
+    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.7s ease-out;
+  }
+  .leaf-scale.bloomed     { transform: scale(1.0); opacity: 1; }
+  .leaf-scale.active-leaf { transform: scale(1.2) !important; }
+
+  /* ── Active branch ── */
   .branch-group.active-branch .branch-line-main { stroke-width: 4px; }
   .branch-group.active-branch .branch-line-sub  { stroke-width: 2px; }
 
-  /* ── Leaves — scale in on bloom ── */
-  .leaf-scale {
+  /* ── Blossoms ── */
+  .blossom {
     transform-box: fill-box;
-    transform-origin: center center;
-    transform: scale(0.2);
-    opacity: 0.1;
-    transition:
-      transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
-      opacity   0.7s ease-out;
+    transform-origin: center;
+    transform: scale(0);
+    opacity: 0;
   }
-  .leaf-scale.bloomed       { transform: scale(1.0); opacity: 1; }
-  .leaf-scale.active-leaf   { transform: scale(1.2) !important; }
+  @keyframes blossom-pop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Stagger delays via classes s1–s8 */
+  .blossom.s1 { --bd: 0ms; }   .blossom.s2 { --bd: 90ms; }
+  .blossom.s3 { --bd: 180ms; } .blossom.s4 { --bd: 270ms; }
+  .blossom.s5 { --bd: 360ms; } .blossom.s6 { --bd: 450ms; }
+  .blossom.s7 { --bd: 540ms; } .blossom.s8 { --bd: 630ms; }
+
+  /* Large/medium/small blossom final scale */
+  .blossom.bl-lg { --bs: 1.0; }
+  .blossom.bl-md { --bs: 0.85; }
+  .blossom.bl-sm { --bs: 0.70; }
+  .blossom        { --bs: 0.80; }
+
+  .tree-desktop.wave-1 .blossom.w1 {
+    animation: blossom-pop 0.55s cubic-bezier(0.34,1.56,0.64,1) var(--bd) forwards;
+  }
+  .tree-desktop.wave-2 .blossom.w2 {
+    animation: blossom-pop 0.55s cubic-bezier(0.34,1.56,0.64,1) var(--bd) forwards;
+  }
+  .tree-desktop.wave-3 .blossom.w3 {
+    animation: blossom-pop 0.55s cubic-bezier(0.34,1.56,0.64,1) var(--bd) forwards;
+  }
+  .tree-desktop.wave-4 .blossom.w4 {
+    animation: blossom-pop 0.55s cubic-bezier(0.34,1.56,0.64,1) var(--bd) forwards;
+  }
 
   /* ── Labels ── */
   .tree-label {
     position: absolute;
-    left: 122px;
+    left: 128px;
     font-family: 'Caveat', cursive;
     font-size: 13.5px;
     color: #5C5840;
@@ -346,84 +559,127 @@
     height: calc(100vh - 72px - 28px);
     pointer-events: none;
     z-index: 20;
-    transition: opacity 0.4s ease;
   }
   @media (min-width: 1024px) { .tree-mobile { display: none; } }
 
-  #mobile-vine {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
+  #mobile-vine { stroke-dasharray: 1400; stroke-dashoffset: 1400; }
+  .tree-mobile.sprouting #mobile-vine {
+    animation: draw-in 2.0s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
   }
 
   .mobile-dot { opacity: 0.28; transition: opacity 0.4s ease; }
-  .mobile-dot .dot-fill { opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease; transform-box: fill-box; transform-origin: center; transform: scale(1); }
+  .mobile-dot .dot-fill { opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease; transform-box: fill-box; transform-origin: center; }
   .mobile-dot.bloomed { opacity: 1; }
   .mobile-dot.bloomed .dot-fill { opacity: 1; }
-  .mobile-dot.active-dot .dot-fill { transform: scale(2.2); }
+  .mobile-dot.active-dot .dot-fill { transform: scale(2); }
+
+  .mobile-blossom { transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34,1.56,0.64,1); transform-box: fill-box; transform-origin: center; transform: scale(0); }
+  .tree-mobile.wave-1 .mb-w1 { opacity: 0.8 !important; transform: scale(1) !important; }
+  .tree-mobile.wave-2 .mb-w2 { opacity: 0.7 !important; transform: scale(1) !important; }
+  .tree-mobile.wave-3 .mb-w3 { opacity: 0.6 !important; transform: scale(1) !important; }
+  .tree-mobile.wave-4 .mb-w4 { opacity: 0.5 !important; transform: scale(1) !important; }
 
   /* ── Reduced motion ── */
   @media (prefers-reduced-motion: reduce) {
-    .branch-line-main, .branch-line-sub { transition: none; stroke-dashoffset: 0; }
-    .leaf-scale { transition: none; transform: scale(1); opacity: 0.2; }
+    #trunk-a, #trunk-b, #trunk-c, #trunk-bark, #mobile-vine,
+    .branch-line-main, .branch-line-sub, .extra-branch {
+      stroke-dashoffset: 0 !important;
+      animation: none !important;
+    }
+    .blossom { animation: none !important; opacity: 0.7; transform: scale(0.9); }
+    .twig-nub { opacity: 0.55; animation: none !important; }
+    .leaf-scale { transform: scale(1); opacity: 0.3; transition: none; }
     .leaf-scale.bloomed { opacity: 1; }
-    #trunk-a, #trunk-b, #trunk-c, #trunk-bark, #mobile-vine { stroke-dashoffset: 0 !important; }
   }
 </style>
 
 
 <script>
+  type SectionId = 'about' | 'work' | 'switzerland' | 'work-with-me';
+  const sectionIds: SectionId[] = ['about', 'work', 'switzerland', 'work-with-me'];
+
   // ── Element refs ──
   const treeEl     = document.getElementById('tree-spine');
   const treeMobile = document.getElementById('tree-mobile');
-  const trunkA     = document.getElementById('trunk-a')     as SVGPathElement | null;
-  const trunkB     = document.getElementById('trunk-b')     as SVGPathElement | null;
-  const trunkC     = document.getElementById('trunk-c')     as SVGPathElement | null;
-  const trunkBark  = document.getElementById('trunk-bark')  as SVGPathElement | null;
+  const trunkA     = document.getElementById('trunk-a')    as SVGPathElement | null;
+  const trunkB     = document.getElementById('trunk-b')    as SVGPathElement | null;
+  const trunkC     = document.getElementById('trunk-c')    as SVGPathElement | null;
+  const trunkBark  = document.getElementById('trunk-bark') as SVGPathElement | null;
   const mobileVine = document.getElementById('mobile-vine') as SVGPathElement | null;
 
-  // Path lengths — measured once after load
-  let lenA = 0, lenB = 0, lenC = 0, lenBark = 0, lenVine = 0;
+  // ── Init path dasharray = pathLength so CSS animation starts from fully hidden ──
+  function initDasharrays() {
+    const setDA = (el: SVGPathElement | null) => {
+      if (!el) return;
+      const len = el.getTotalLength();
+      el.style.strokeDasharray  = `${len}`;
+      el.style.strokeDashoffset = `${len}`;
+    };
+    setDA(trunkA); setDA(trunkB); setDA(trunkC); setDA(trunkBark); setDA(mobileVine);
 
-  function initLengths() {
-    if (trunkA)    { lenA    = trunkA.getTotalLength();    trunkA.style.strokeDasharray    = `${lenA}`;    trunkA.style.strokeDashoffset    = `${lenA}`; }
-    if (trunkB)    { lenB    = trunkB.getTotalLength();    trunkB.style.strokeDasharray    = `${lenB}`;    trunkB.style.strokeDashoffset    = `${lenB}`; }
-    if (trunkC)    { lenC    = trunkC.getTotalLength();    trunkC.style.strokeDasharray    = `${lenC}`;    trunkC.style.strokeDashoffset    = `${lenC}`; }
-    if (trunkBark) { lenBark = trunkBark.getTotalLength(); trunkBark.style.strokeDasharray = `${lenBark}`; trunkBark.style.strokeDashoffset = `${lenBark}`; }
-    if (mobileVine){ lenVine = mobileVine.getTotalLength(); mobileVine.style.strokeDasharray = `${lenVine}`; mobileVine.style.strokeDashoffset = `${lenVine}`; }
+    // Same for branches + extra branches
+    document.querySelectorAll<SVGPathElement>('.branch-line-main, .branch-line-sub, .extra-branch')
+      .forEach(p => { const l = p.getTotalLength(); p.style.strokeDasharray = `${l}`; p.style.strokeDashoffset = `${l}`; });
   }
 
-  // Helper: animate a path segment based on scroll progress window [pStart, pEnd]
-  function setOffset(path: SVGPathElement | null, len: number, pStart: number, pEnd: number, progress: number) {
-    if (!path || !len) return;
-    const p = Math.max(0, Math.min(1, (progress - pStart) / (pEnd - pStart)));
-    path.style.strokeDashoffset = `${len * (1 - p)}`;
+  // ── Sprout — triggered once when hero exits viewport ──
+  let sproutDone = false;
+
+  function startSprout() {
+    if (sproutDone) return;
+    sproutDone = true;
+
+    // Fade in tree containers
+    if (treeEl)     { treeEl.style.transition     = 'opacity 0.4s ease'; treeEl.style.opacity     = '1'; }
+    if (treeMobile) { treeMobile.style.transition  = 'opacity 0.4s ease'; treeMobile.style.opacity = '1'; }
+
+    // Add class — CSS animations fire
+    treeEl?.classList.add('sprouting');
+    treeMobile?.classList.add('sprouting');
+
+    // Leaves bloom in sequence after their branch draws
+    // Delays match the CSS animation offsets above
+    const branchLeafDelays: Record<string, number> = {
+      'branch-work-with-me': 1500,  // branch starts 800ms + draws 650ms
+      'branch-switzerland':  2000,
+      'branch-work':         2300,
+      'branch-about':        2600,
+    };
+    Object.entries(branchLeafDelays).forEach(([branchId, baseDelay]) => {
+      const branch = document.getElementById(branchId);
+      branch?.querySelectorAll<HTMLElement>('.leaf-scale').forEach((leaf, i) => {
+        setTimeout(() => leaf.classList.add('bloomed'), baseDelay + i * 80);
+      });
+    });
   }
 
-  // ── Active section tracking ──
-  const sectionIds = ['about', 'work', 'switzerland', 'work-with-me'] as const;
+  // ── Scroll-driven blossom waves ──
+  let waveState = 0;
+
+  function updateBlossoms() {
+    const scrollY = window.scrollY;
+    const heroH   = document.getElementById('hero')?.offsetHeight ?? window.innerHeight;
+    const pageH   = document.documentElement.scrollHeight - window.innerHeight;
+
+    // Progress: 0 at hero exit, 1 at page bottom
+    const progress = Math.max(0, Math.min(1, (scrollY - heroH) / Math.max(1, pageH - heroH)));
+
+    const newWave = progress > 0.80 ? 4 : progress > 0.55 ? 3 : progress > 0.28 ? 2 : progress > 0.05 ? 1 : 0;
+    if (newWave !== waveState) {
+      waveState = newWave;
+      // Add wave classes cumulatively (waves stay once added)
+      for (let w = 1; w <= newWave; w++) {
+        treeEl?.classList.add(`wave-${w}`);
+        treeMobile?.classList.add(`wave-${w}`);
+      }
+    }
+
+    // Active section tracking
+    updateActiveSection();
+  }
+
+  // ── Active section ──
   let currentActive = '';
-
-  function setActiveSection(id: string) {
-    if (id === currentActive) return;
-
-    // Deactivate old
-    if (currentActive) {
-      document.getElementById(`branch-${currentActive}`)?.classList.remove('active-branch');
-      document.querySelector(`.tree-label[data-label-for="${currentActive}"]`)?.classList.remove('label-active');
-      document.getElementById(`mdot-${currentActive}`)?.classList.remove('active-dot');
-      document.getElementById(`branch-${currentActive}`)?.querySelectorAll<HTMLElement>('.leaf-scale').forEach(l => l.classList.remove('active-leaf'));
-    }
-
-    currentActive = id;
-
-    // Activate new
-    if (id) {
-      document.getElementById(`branch-${id}`)?.classList.add('active-branch');
-      document.querySelector(`.tree-label[data-label-for="${id}"]`)?.classList.add('label-active');
-      document.getElementById(`mdot-${id}`)?.classList.add('active-dot');
-      document.getElementById(`branch-${id}`)?.querySelectorAll<HTMLElement>('.leaf-scale').forEach(l => l.classList.add('active-leaf'));
-    }
-  }
 
   function updateActiveSection() {
     const viewCenter = window.scrollY + window.innerHeight * 0.45;
@@ -434,91 +690,58 @@
       const el = document.getElementById(id);
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      const sectionCenter = window.scrollY + rect.top + rect.height / 2;
-      const dist = Math.abs(sectionCenter - viewCenter);
+      const center = window.scrollY + rect.top + rect.height / 2;
+      const dist = Math.abs(center - viewCenter);
       if (dist < closestDist) { closestDist = dist; closest = id; }
     });
 
-    // Only set active if section is actually somewhat visible
-    const el = document.getElementById(closest);
-    if (el) {
-      const rect = el.getBoundingClientRect();
-      const inView = rect.bottom > 0 && rect.top < window.innerHeight;
-      setActiveSection(inView ? closest : '');
+    // Only mark active if section is actually on screen
+    const activeEl = document.getElementById(closest);
+    if (!activeEl) return;
+    const rect = activeEl.getBoundingClientRect();
+    const visible = rect.bottom > 50 && rect.top < window.innerHeight - 50;
+    const next = visible ? closest : '';
+
+    if (next === currentActive) return;
+
+    // Deactivate previous
+    if (currentActive) {
+      document.getElementById(`branch-${currentActive}`)?.classList.remove('active-branch');
+      document.querySelector(`.tree-label[data-label-for="${currentActive}"]`)?.classList.remove('label-active');
+      document.getElementById(`mdot-${currentActive}`)?.classList.remove('active-dot');
+      document.getElementById(`branch-${currentActive}`)?.querySelectorAll<HTMLElement>('.leaf-scale')
+        .forEach(l => l.classList.remove('active-leaf'));
+    }
+
+    currentActive = next;
+
+    if (next) {
+      document.getElementById(`branch-${next}`)?.classList.add('active-branch');
+      document.querySelector(`.tree-label[data-label-for="${next}"]`)?.classList.add('label-active');
+      document.getElementById(`mdot-${next}`)?.classList.add('active-dot');
+      document.getElementById(`branch-${next}`)?.querySelectorAll<HTMLElement>('.leaf-scale')
+        .forEach(l => l.classList.add('active-leaf'));
     }
   }
 
-  // ── Twig nub visibility ──
-  function updateTwigNubs(trunkProgress: number) {
-    // Nubs reveal as trunk passes their approximate y position
-    // y 670 = (792-670)/784 ≈ 16% of trunk path from bottom
-    const thresholds = [0.14, 0.35, 0.58, 0.80];
-    document.querySelectorAll<HTMLElement>('.twig-nub').forEach((nub, i) => {
-      const t = thresholds[i] ?? 0.5;
-      nub.style.opacity = trunkProgress > t ? '0.55' : '0';
+  // ── IntersectionObserver: bloom labels + mobile dots when section enters view ──
+  const bloomObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const id = e.target.id;
+      document.querySelector(`.tree-label[data-label-for="${id}"]`)?.classList.add('label-bloomed');
+      document.getElementById(`mdot-${id}`)?.classList.add('bloomed');
     });
-  }
+  }, { threshold: 0.15 });
 
-  // ── Main scroll handler ──
-  function updateTree() {
-    const scrollY   = window.scrollY;
-    const heroEl    = document.getElementById('hero');
-    const heroH     = heroEl ? heroEl.offsetHeight : window.innerHeight;
-    const pageH     = document.documentElement.scrollHeight;
-    const viewH     = window.innerHeight;
-
-    // Opacity: fade in from 0 as hero exits (0.7→1.0 of hero height)
-    const fadeStart = heroH * 0.70;
-    const fadeEnd   = heroH * 0.95;
-    const opacity   = Math.max(0, Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart)));
-
-    if (treeEl)     treeEl.style.opacity     = opacity.toString();
-    if (treeMobile) treeMobile.style.opacity = opacity.toString();
-
-    // Trunk growth: 0→1 from hero-exit to page-bottom
-    const trunkStart = heroH * 0.7;
-    const trunkEnd   = pageH - viewH;
-    const trunkProg  = Math.max(0, Math.min(1, (scrollY - trunkStart) / (trunkEnd - trunkStart)));
-
-    // Three segments, evenly spaced: A (0→0.35), B (0.35→0.65), C (0.65→1.0)
-    setOffset(trunkA,    lenA,    0.00, 0.35, trunkProg);
-    setOffset(trunkB,    lenB,    0.35, 0.65, trunkProg);
-    setOffset(trunkC,    lenC,    0.65, 1.00, trunkProg);
-    setOffset(trunkBark, lenBark, 0.00, 0.95, trunkProg);
-    setOffset(mobileVine, lenVine, 0.00, 0.90, trunkProg);
-
-    updateTwigNubs(trunkProg);
-    updateActiveSection();
-  }
-
-  // ── Branch + leaf bloom on section entry ──
-  const bloomedSections = new Set<string>();
-
-  function bloomBranch(sectionId: string) {
-    if (bloomedSections.has(sectionId)) return;
-    bloomedSections.add(sectionId);
-
-    const branch = document.getElementById(`branch-${sectionId}`);
-    const label  = document.querySelector<HTMLElement>(`.tree-label[data-label-for="${sectionId}"]`);
-    const mdot   = document.getElementById(`mdot-${sectionId}`);
-
-    branch?.classList.add('bloomed');
-    label?.classList.add('label-bloomed');
-    mdot?.classList.add('bloomed');
-
-    // Leaves bloom after branch finishes drawing (700ms for main + sub)
-    const leaves = branch?.querySelectorAll<HTMLElement>('.leaf-scale') ?? [];
-    leaves.forEach((leaf, i) => {
-      setTimeout(() => leaf.classList.add('bloomed'), 700 + i * 80);
+  // ── Hero exit observer — triggers sprout ──
+  const heroObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) startSprout();
     });
-  }
+  }, { threshold: 0.3 });
 
-  const bloomObserver = new IntersectionObserver(
-    entries => entries.forEach(e => { if (e.isIntersecting) bloomBranch(e.target.id); }),
-    { threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
-  );
-
-  // ── Smooth scroll on label click ──
+  // ── Label smooth-scroll ──
   document.querySelectorAll<HTMLAnchorElement>('.tree-label').forEach(a => {
     a.addEventListener('click', e => {
       e.preventDefault();
@@ -527,21 +750,25 @@
   });
 
   // ── Boot ──
-  // Wait for fonts + layout so getTotalLength() is accurate
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(initLengths, 50));
-  } else {
-    setTimeout(initLengths, 50);
-  }
-
   window.addEventListener('load', () => {
-    initLengths();
-    updateTree();
+    initDasharrays();
+
+    const hero = document.getElementById('hero');
+    if (hero) heroObserver.observe(hero);
+
     sectionIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) bloomObserver.observe(el);
     });
-  });
 
-  window.addEventListener('scroll', updateTree, { passive: true });
+    window.addEventListener('scroll', () => {
+      if (!sproutDone && window.scrollY > (document.getElementById('hero')?.offsetHeight ?? 0) * 0.5) {
+        startSprout();
+      }
+      updateBlossoms();
+    }, { passive: true });
+
+    // Initial check (in case already scrolled on load)
+    updateBlossoms();
+  });
 </script>
