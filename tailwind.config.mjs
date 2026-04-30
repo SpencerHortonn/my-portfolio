@@ -4,21 +4,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Single warm-paper palette — one strip, no alternation
-        'f-white':   '#E5DCC8', // THE site background — warm film-paper beige
-        'f-cream':   '#E5DCC8', // alias: kept so existing classes don't break
-        'f-blue-pl': '#E5DCC8', // alias: same
-        'f-blue':    '#A8C8DC', // faded sky blue accent
-        'f-blue-lt': '#D0E5F0', // lighter blue (pull-quotes, accents)
-        'f-sand':    '#C4B5A5', // warm sand tone
-        'f-ink':     '#2B2825', // body text — deep warm charcoal
-        'f-head':    '#1F1C18', // headings — slightly deeper
-        'f-gray':    '#6B6357', // muted secondary text
-        'f-border':  '#BFB39C', // hairline dividers — warm, not cool
+        // Strict two-tone palette — warm beige + charcoal, no blue
+        'f-white':      '#E8DFD0', // main bg — unbleached linen
+        'f-cream':      '#E8DFD0', // alias
+        'f-paper-warm': '#EEE6D6', // soft lift, polaroid card bg
+        'f-paper-deep': '#DCD0BA', // warm pressed/hover state
+        'f-ink':        '#2B2B2B', // body text + accents
+        'f-ink-deep':   '#1F1C18', // headings, strongest
+        'f-gray':       '#6B6357', // warm mid-gray, secondary
+        'f-mid-soft':   '#9A9186', // disabled, very muted
+        'f-border':     '#BFB39C', // hairline dividers — warm, not cool
+        'f-head':       '#1F1C18', // heading alias
+        'f-night':      '#1F1B16', // warm near-black panel
       },
       fontFamily: {
         serif: ['Fraunces', 'Georgia', 'serif'],
         sans:  ['Inter', 'system-ui', 'sans-serif'],
+        mono:  ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
     },
   },
