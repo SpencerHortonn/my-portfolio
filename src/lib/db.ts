@@ -318,52 +318,82 @@ export interface AnalyticsTotals {
   uniqueAllTime: number;
 }
 
+const EMPTY_ANALYTICS_TOTALS: AnalyticsTotals = {
+  today: 0, last7: 0, last30: 0, allTime: 0,
+  uniqueToday: 0, unique7: 0, unique30: 0, uniqueAllTime: 0,
+};
+
+// The analytics queries all fall back to empty/zeroed results on error —
+// most commonly because the page_views table hasn't been created yet via
+// the migration. Without this, the admin dashboard (which surfaces a
+// summary card) would 500 entirely until the migration is run.
 export async function getAnalyticsTotals(): Promise<AnalyticsTotals> {
-  const row = await queryOne<{
-    today: string; last7: string; last30: string; all_time: string;
-    unique_today: string; unique_7: string; unique_30: string; unique_all_time: string;
-  }>(`
-    select
-      count(*) filter (where created_at >= now() - interval '1 day')   as today,
-      count(*) filter (where created_at >= now() - interval '7 days')  as last7,
-      count(*) filter (where created_at >= now() - interval '30 days') as last30,
-      count(*)                                                        as all_time,
-      count(distinct visitor_id) filter (where created_at >= now() - interval '1 day')   as unique_today,
-      count(distinct visitor_id) filter (where created_at >= now() - interval '7 days')  as unique_7,
-      count(distinct visitor_id) filter (where created_at >= now() - interval '30 days') as unique_30,
-      count(distinct visitor_id)                                                        as unique_all_time
-    from page_views
-  `);
-  return {
-    today: Number(row?.today ?? 0),
-    last7: Number(row?.last7 ?? 0),
-    last30: Number(row?.last30 ?? 0),
-    allTime: Number(row?.all_time ?? 0),
-    uniqueToday: Number(row?.unique_today ?? 0),
-    unique7: Number(row?.unique_7 ?? 0),
-    unique30: Number(row?.unique_30 ?? 0),
-    uniqueAllTime: Number(row?.unique_all_time ?? 0),
-  };
+  try {
+    const row = await queryOne<{
+      today: string; last7: string; last30: string; all_time: string;
+      unique_today: string; unique_7: string; unique_30: string; unique_all_time: string;
+    }>(`
+      select
+        count(*) filter (where created_at >= now() - interval '1 day')   as today,
+        count(*) filter (where created_at >= now() - interval '7 days')  as last7,
+        count(*) filter (where created_at >= now() - interval '30 days') as last30,
+        count(*)                                                        as all_time,
+        count(distinct visitor_id) filter (where created_at >= now() - interval '1 day')   as unique_today,
+        count(distinct visitor_id) filter (where created_at >= now() - interval '7 days')  as unique_7,
+        count(distinct visitor_id) filter (where created_at >= now() - interval '30 days') as unique_30,
+        count(distinct visitor_id)                                                        as unique_all_time
+      from page_views
+    `);
+    if (!row) return EMPTY_ANALYTICS_TOTALS;
+    return {
+      today: Number(row.today ?? 0),
+      last7: Number(row.last7 ?? 0),
+      last30: Number(row.last30 ?? 0),
+      allTime: Number(row.all_time ?? 0),
+      uniqueToday: Number(row.unique_today ?? 0),
+      unique7: Number(row.unique_7 ?? 0),
+      unique30: Number(row.unique_30 ?? 0),
+      uniqueAllTime: Number(row.unique_all_time ?? 0),
+    };
+  } catch (err) {
+    console.error('getAnalyticsTotals failed (has the page_views migration been run?):', err);
+    return EMPTY_ANALYTICS_TOTALS;
+  }
 }
 
 export async function getDailyViewCounts(days: number): Promise<{ date: string; count: number }[]> {
-  const rows = await query<{ date: string; count: string }>(`
-    select d::date::text as date, count(pv.id)::int as count
-    from generate_series((current_date - ($1 || ' days')::interval)::date, current_date, interval '1 day') d
-    left join page_views pv on date_trunc('day', pv.created_at) = d
-    group by d
-    order by d
-  `, [days - 1]);
-  return rows.map(r => ({ date: r.date, count: Number(r.count) }));
+  try {
+    const rows = await query<{ date: string; count: string }>(`
+      select d::date::text as date, count(pv.id)::int as count
+      from generate_series((current_date - ($1 || ' days')::interval)::date, current_date, interval '1 day') d
+      left join page_views pv on date_trunc('day', pv.created_at) = d
+      group by d
+      order by d
+    `, [days - 1]);
+    return rows.map(r => ({ date: r.date, count: Number(r.count) }));
+  } catch (err) {
+    console.error('getDailyViewCounts failed (has the page_views migration been run?):', err);
+    const today = new Date();
+    return Array.from({ length: days }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() - (days - 1 - i));
+      return { date: d.toISOString().slice(0, 10), count: 0 };
+    });
+  }
 }
 
-export function getTopPaths(days: number, limit: number): Promise<{ path: string; count: number }[]> {
-  return query<{ path: string; count: number }>(`
-    select path, count(*)::int as count
-    from page_views
-    where created_at >= now() - ($1 || ' days')::interval
-    group by path
-    order by count desc
-    limit $2
-  `, [days, limit]);
+export async function getTopPaths(days: number, limit: number): Promise<{ path: string; count: number }[]> {
+  try {
+    return await query<{ path: string; count: number }>(`
+      select path, count(*)::int as count
+      from page_views
+      where created_at >= now() - ($1 || ' days')::interval
+      group by path
+      order by count desc
+      limit $2
+    `, [days, limit]);
+  } catch (err) {
+    console.error('getTopPaths failed (has the page_views migration been run?):', err);
+    return [];
+  }
 }
