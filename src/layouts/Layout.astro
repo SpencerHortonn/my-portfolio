@@ -162,49 +162,52 @@ const isHome = path === '/';
     /* ── Home page — nav floats over the hero video/image ──
        Flat, solid semi-dark bar (no fade-to-transparent — that edge was
        rendering as a visible seam against the playing video) with white
-       text throughout for reliable contrast regardless of footage. */
-    .film-nav--hero {
+       text throughout for reliable contrast regardless of footage.
+       Every selector here is written as ".film-nav.film-nav--hero ..."
+       (not just ".film-nav--hero ...") to guarantee it outranks the
+       equivalent base ".film-nav ..." rule regardless of which one
+       happens to appear later in the file — with plain ".film-nav--hero",
+       equal specificity + file order caused text/rail colors to silently
+       lose to the base rules three separate times while this was built. */
+    .film-nav.film-nav--hero {
       background: rgba(10, 9, 7, 0.55);
       border-bottom-color: rgba(255, 255, 255, 0.15);
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
     }
-    .film-nav--hero .film-slate { color: rgba(255,255,255,0.55); }
-    .film-nav--hero .film-slate .tag { color: rgba(255,255,255,0.8); }
-    .film-nav--hero .film-slate .dot { background: #fff; }
-    .film-nav--hero .film-slate .tc { color: rgba(255,255,255,0.92); }
-    .film-nav--hero .film-brand .name { color: #fff; }
-    .film-nav--hero .film-brand .role { color: rgba(255,255,255,0.75); }
-    .film-nav--hero .film-links a { color: rgba(255,255,255,0.8); }
-    .film-nav--hero .film-links a::before { color: rgba(255,255,255,0.55); }
-    .film-nav--hero .film-links a::after { background: #fff; }
-    .film-nav--hero .film-links a:hover,
-    .film-nav--hero .film-links a.is-active { color: #fff; }
-    .film-nav--hero #mobile-menu-btn { color: #fff; }
-    /* Specificity bumped (.film-nav.film-nav--hero, not just .film-nav--hero)
-       so this reliably beats the base ".film-nav .rail { display: flex }"
-       rule regardless of which one appears later in the file. */
+    .film-nav.film-nav--hero .film-slate { color: rgba(255,255,255,0.55); }
+    .film-nav.film-nav--hero .film-slate .tag { color: rgba(255,255,255,0.8); }
+    .film-nav.film-nav--hero .film-slate .dot { background: #fff; }
+    .film-nav.film-nav--hero .film-slate .tc { color: rgba(255,255,255,0.92); }
+    .film-nav.film-nav--hero .film-brand .name { color: #fff; }
+    .film-nav.film-nav--hero .film-brand .role { color: rgba(255,255,255,0.75); }
+    .film-nav.film-nav--hero .film-links a { color: rgba(255,255,255,0.8); }
+    .film-nav.film-nav--hero .film-links a::before { color: rgba(255,255,255,0.55); }
+    .film-nav.film-nav--hero .film-links a::after { background: #fff; }
+    .film-nav.film-nav--hero .film-links a:hover,
+    .film-nav.film-nav--hero .film-links a.is-active { color: #fff; }
+    .film-nav.film-nav--hero #mobile-menu-btn { color: #fff; }
     .film-nav.film-nav--hero .rail { display: none; }
 
     /* Once scrolled past the hero, fall back to the normal solid nav */
-    .film-nav--hero.scrolled {
+    .film-nav.film-nav--hero.scrolled {
       background: rgba(232, 223, 208, 0.96);
       border-bottom-color: rgba(191, 179, 156, 0.6);
       backdrop-filter: blur(14px) saturate(1.1);
       -webkit-backdrop-filter: blur(14px) saturate(1.1);
     }
-    .film-nav--hero.scrolled .film-slate { color: #9A9186; }
-    .film-nav--hero.scrolled .film-slate .tag { color: #6B6357; }
-    .film-nav--hero.scrolled .film-slate .dot { background: #1F1C18; }
-    .film-nav--hero.scrolled .film-slate .tc { color: #1F1C18; }
-    .film-nav--hero.scrolled .film-brand .name { color: #1F1C18; }
-    .film-nav--hero.scrolled .film-brand .role { color: #6B6357; }
-    .film-nav--hero.scrolled .film-links a { color: #6B6357; }
-    .film-nav--hero.scrolled .film-links a::before { color: #9A9186; }
-    .film-nav--hero.scrolled .film-links a::after { background: #1F1C18; }
-    .film-nav--hero.scrolled .film-links a:hover,
-    .film-nav--hero.scrolled .film-links a.is-active { color: #1F1C18; }
-    .film-nav--hero.scrolled #mobile-menu-btn { color: #1F1C18; }
+    .film-nav.film-nav--hero.scrolled .film-slate { color: #9A9186; }
+    .film-nav.film-nav--hero.scrolled .film-slate .tag { color: #6B6357; }
+    .film-nav.film-nav--hero.scrolled .film-slate .dot { background: #1F1C18; }
+    .film-nav.film-nav--hero.scrolled .film-slate .tc { color: #1F1C18; }
+    .film-nav.film-nav--hero.scrolled .film-brand .name { color: #1F1C18; }
+    .film-nav.film-nav--hero.scrolled .film-brand .role { color: #6B6357; }
+    .film-nav.film-nav--hero.scrolled .film-links a { color: #6B6357; }
+    .film-nav.film-nav--hero.scrolled .film-links a::before { color: #9A9186; }
+    .film-nav.film-nav--hero.scrolled .film-links a::after { background: #1F1C18; }
+    .film-nav.film-nav--hero.scrolled .film-links a:hover,
+    .film-nav.film-nav--hero.scrolled .film-links a.is-active { color: #1F1C18; }
+    .film-nav.film-nav--hero.scrolled #mobile-menu-btn { color: #1F1C18; }
     .film-nav.film-nav--hero.scrolled .rail { display: flex; }
 
     /* Slate metadata row — desktop only, matches the "hidden md:flex" on the element */
