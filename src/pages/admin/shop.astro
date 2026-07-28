@@ -52,7 +52,7 @@ const editingPrice = editing ? (editing.price_cents / 100).toFixed(2) : '';
       </div>
       <div>
         <label class="admin-label" for="cover_image_file">...or upload a cover image</label>
-        <input class="admin-input" id="cover_image_file" name="cover_image_file" type="file" accept="image/*" />
+        <input class="admin-input" id="cover_image_file" name="cover_image_file" type="file" accept="image/*" data-blob-folder="shop" />
       </div>
 
       <div class="md:col-span-2">
@@ -62,7 +62,8 @@ const editingPrice = editing ? (editing.price_cents / 100).toFixed(2) : '';
 
       <div>
         <label class="admin-label" for="digital_file">Digital product file (LUTs/presets .zip/.cube)</label>
-        <input class="admin-input" id="digital_file" name="digital_file" type="file" />
+        <input type="hidden" name="file_url" value={editing?.file_url ?? ''} />
+        <input class="admin-input" id="digital_file" name="digital_file" type="file" data-blob-folder="shop-files" data-url-field="file_url" />
         {editing?.file_url && <p class="font-sans text-xs text-f-gray mt-1">Current file uploaded ✓</p>}
       </div>
       <div>

@@ -103,6 +103,57 @@ const path = Astro.url.pathname;
     .admin-btn-ghost:hover { color: #1F1C18; border-color: #1F1C18; }
     .admin-btn-danger { background: #7a2e2e; color: #fff; }
     .admin-btn-danger:hover { background: #5c2222; }
+    .blob-upload-status {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px;
+      color: #6B6357;
+      margin-top: 6px;
+    }
+    .blob-upload-status.is-error { color: #7a2e2e; }
   </style>
+
+  <script>
+    // Uploads go straight from the browser to Blob storage instead of
+    // through the serverless function — otherwise a real photo/video from
+    // a phone easily blows past Vercel's ~4.5MB function payload limit.
+    import { upload } from '@vercel/blob/client';
+
+    document.querySelectorAll<HTMLInputElement>('input[type="file"][data-blob-folder]').forEach(fileInput => {
+      const status = document.createElement('p');
+      status.className = 'blob-upload-status';
+      fileInput.insertAdjacentElement('afterend', status);
+
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+
+        const form = fileInput.closest('form');
+        const targetName = fileInput.dataset.urlField || fileInput.name.replace(/_file$/, '');
+        const targetField = form?.querySelector<HTMLInputElement>(`[name="${targetName}"]`);
+        const folder = fileInput.dataset.blobFolder;
+
+        status.textContent = `Uploading ${file.name}…`;
+        status.classList.remove('is-error');
+        fileInput.disabled = true;
+
+        try {
+          const blob = await upload(`${folder}/${Date.now()}-${file.name}`, file, {
+            access: 'public',
+            handleUploadUrl: '/api/admin/blob-upload',
+          });
+          if (targetField) targetField.value = blob.url;
+          status.textContent = 'Uploaded ✓';
+          // Clear the file input so its (large) contents never get submitted
+          // through the form itself — the URL field above already has it.
+          fileInput.value = '';
+        } catch (err) {
+          status.textContent = `Upload failed: ${err instanceof Error ? err.message : 'unknown error'}`;
+          status.classList.add('is-error');
+        } finally {
+          fileInput.disabled = false;
+        }
+      });
+    });
+  </script>
 </body>
 </html>

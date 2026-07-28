@@ -41,7 +41,7 @@ const editing = editId ? await getPortfolioItem(Number(editId)) : null;
       </div>
       <div>
         <label class="admin-label" for="client_logo_file">...or upload a logo</label>
-        <input class="admin-input" id="client_logo_file" name="client_logo_file" type="file" accept="image/*" />
+        <input class="admin-input" id="client_logo_file" name="client_logo_file" type="file" accept="image/*" data-blob-folder="portfolio-logos" />
       </div>
 
       <div class="md:col-span-2">
@@ -78,7 +78,7 @@ const editing = editId ? await getPortfolioItem(Number(editId)) : null;
       </div>
       <div>
         <label class="admin-label" for="thumbnail_file">...or upload a thumbnail</label>
-        <input class="admin-input" id="thumbnail_file" name="thumbnail_file" type="file" accept="image/*" />
+        <input class="admin-input" id="thumbnail_file" name="thumbnail_file" type="file" accept="image/*" data-blob-folder="portfolio" />
       </div>
 
       <div>

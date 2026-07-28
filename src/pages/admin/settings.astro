@@ -47,7 +47,7 @@ const saved = Astro.url.searchParams.get('saved') === '1';
         </div>
         <div>
           <label class="admin-label" for="hero_media_file">...or upload a file</label>
-          <input class="admin-input" id="hero_media_file" name="hero_media_file" type="file" accept="image/*,video/*" />
+          <input class="admin-input" id="hero_media_file" name="hero_media_file" type="file" accept="image/*,video/*" data-blob-folder="hero" data-url-field="hero_media_url" />
         </div>
       </div>
     </fieldset>
@@ -65,7 +65,7 @@ const saved = Astro.url.searchParams.get('saved') === '1';
         </div>
         <div>
           <label class="admin-label" for="about_photo_file">...or upload a photo</label>
-          <input class="admin-input" id="about_photo_file" name="about_photo_file" type="file" accept="image/*" />
+          <input class="admin-input" id="about_photo_file" name="about_photo_file" type="file" accept="image/*" data-blob-folder="about" />
         </div>
       </div>
     </fieldset>
