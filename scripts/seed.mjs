@@ -92,19 +92,31 @@ const settings = {
     "I'm not interested in building a career that looks good on paper but costs everything else. I'd rather make work that means something and figure out the money as it comes than flip that around. That's not a philosophy I picked up somewhere. It's just what's been true every time I've been honest about it.",
     "This June I'm heading to Switzerland for YWAM DTS — five months through November. It's not a gap year. It's not an escape. It's where I'm supposed to be, and I can't really explain it better than that. I'm bringing my camera.",
   ],
-  switzerland: {
-    dateRange: 'June 28 – Nov 22, 2026',
-    paragraphs: [
-      "On June 28th I leave for Switzerland for YWAM DTS — a five-month discipleship and mission training program that runs through November 22nd. It's not a gap year. It's not a sabbatical. It's where I'm supposed to be, and I can't really explain it better than that.",
-      "I'll be creating the whole time — the places, the people, whatever God's doing in the middle of it. If you want to follow along, drop your email below. I'll reach out when things go live.",
+  hero_media: {
+    type: 'image',
+    url: '/pictures%20of%20me/IMG_4652.JPG',
+  },
+  about_photo: '/image%20for%20about%20me.JPG',
+  work_with_me: {
+    intro: "I make content that lands — not because of the specs, but because I'm paying attention. If your brand is doing something worth showing, I want to help show it.",
+    services: [
+      { title: 'Short-form video', desc: 'TikTok, Reels, Shorts — native-format content made by someone who actually lives on the platforms.' },
+      { title: 'Photography', desc: 'Available-light portraits, travel editorial, lifestyle product work. No studio required.' },
+      { title: 'Cinematic content', desc: 'Longer-form brand films with a travel or adventure angle. Story first, specs second.' },
+      { title: 'UGC-adjacent', desc: 'Creator-feel content without the agency price tag. Raw, honest, on-brand.' },
     ],
   },
-  collaborators: [
-    { name: 'Lightbox Collective', logo: '' },
-    { name: 'Brand Partner', logo: '' },
-    { name: 'Brand Partner', logo: '' },
-  ],
+  nav_visibility: {
+    about: true,
+    portfolio: true,
+    shop: true,
+    workWithMe: true,
+  },
 };
+
+function slugify(title) {
+  return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
 
 async function main() {
   const { rows: existing } = await pool.query('select count(*) from portfolio_items');
@@ -114,10 +126,11 @@ async function main() {
     for (const [i, item] of workItems.entries()) {
       await pool.query(
         `insert into portfolio_items
-          (title, caption, type, orientation, thumbnail, full_url, embed_url, video_file, images, sort_order, published)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true)`,
+          (title, caption, type, orientation, thumbnail, full_url, embed_url, video_file, images, sort_order, published, slug, client_name, description)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true,$11,$12,$13)`,
         [item.title, item.caption, item.type, item.orientation, item.thumbnail,
-         item.full_url, item.embed_url, item.video_file, JSON.stringify(item.images), i]
+         item.full_url, item.embed_url, item.video_file, JSON.stringify(item.images), i,
+         slugify(item.title), '', '']
       );
     }
     console.log(`Seeded ${workItems.length} portfolio items.`);

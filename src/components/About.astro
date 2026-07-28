@@ -1,10 +1,9 @@
 ---
 interface Props {
   paragraphs: string[];
+  profileImage: string;
 }
-const { paragraphs } = Astro.props;
-
-const profileImage = '/image%20for%20about%20me.JPG';
+const { paragraphs, profileImage } = Astro.props;
 ---
 
 <section id="about" class="py-16 md:py-24">

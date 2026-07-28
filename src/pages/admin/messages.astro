@@ -1,0 +1,30 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { listContactMessages } from '../../lib/db';
+
+const messages = await listContactMessages();
+---
+
+<AdminLayout title="Messages">
+  <h1 class="font-serif text-3xl font-light text-f-ink-deep mb-2">Messages</h1>
+  <p class="font-sans text-sm text-f-gray mb-8">
+    Submissions from the Work With Me contact form. These also get emailed to you directly when they come in.
+  </p>
+
+  {messages.length === 0 ? (
+    <p class="font-sans text-sm text-f-gray">No messages yet.</p>
+  ) : (
+    <div class="flex flex-col gap-3">
+      {messages.map(m => (
+        <div class="border border-f-border bg-white p-5">
+          <div class="flex items-baseline justify-between gap-4 mb-2">
+            <p class="font-serif text-base text-f-ink-deep">{m.name}</p>
+            <p class="font-sans text-xs text-f-gray">{new Date(m.created_at).toLocaleString()}</p>
+          </div>
+          <a href={`mailto:${m.email}`} class="font-sans text-sm text-f-gray hover:text-f-ink underline mb-3 inline-block">{m.email}</a>
+          <p class="font-sans text-sm text-f-ink whitespace-pre-line">{m.message}</p>
+        </div>
+      ))}
+    </div>
+  )}
+</AdminLayout>

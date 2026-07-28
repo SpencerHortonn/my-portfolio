@@ -1,18 +1,21 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { listPortfolioItems, listShopProducts, listSubscribers } from '../../lib/db';
+import { listContactMessages, listPortfolioItems, listShopProducts, listTestimonials } from '../../lib/db';
 
-const [portfolio, products, subscribers] = await Promise.all([
+const [portfolio, products, testimonials, messages] = await Promise.all([
   listPortfolioItems(),
   listShopProducts(),
-  listSubscribers(),
+  listTestimonials(),
+  listContactMessages(),
 ]);
 
 const cards = [
-  { href: '/admin/portfolio', label: 'Portfolio items', count: portfolio.length, desc: 'Films, photos, and galleries shown on /portfolio.' },
+  { href: '/admin/portfolio', label: 'Portfolio / case studies', count: portfolio.length, desc: 'Client and personal work shown on /portfolio, each with its own case study page.' },
+  { href: '/admin/testimonials', label: 'Testimonials', count: testimonials.length, desc: 'Rotating quotes on /portfolio — link one to a specific case study to show it there too.' },
   { href: '/admin/shop', label: 'Shop products', count: products.length, desc: 'LUTs/presets shown on /shop — Stripe-ready, checkout not wired up yet.' },
-  { href: '/admin/subscribers', label: 'Subscribers', count: subscribers.length, desc: 'Emails collected from the Switzerland follow-along form.' },
-  { href: '/admin/settings', label: 'Site settings', count: null, desc: 'Bio, hero tagline, contact info, socials, Switzerland copy.' },
+  { href: '/admin/work-with-me', label: 'Work With Me', count: null, desc: 'Intro copy and services list shown on /work-with-me.' },
+  { href: '/admin/messages', label: 'Messages', count: messages.length, desc: 'Contact form submissions — also emailed to you directly.' },
+  { href: '/admin/settings', label: 'Site settings', count: null, desc: 'Hero media, bio, contact info, socials, and which nav tabs show.' },
 ];
 ---
 

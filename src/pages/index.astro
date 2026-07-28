@@ -1,36 +1,32 @@
 ---
 import Layout          from '../layouts/Layout.astro';
-import Hero            from '../components/Hero.astro';
-import QuoteInterlude  from '../components/QuoteInterlude.astro';
-import Switzerland     from '../components/Switzerland.astro';
-import WorkWithMe      from '../components/WorkWithMe.astro';
-import Footer          from '../components/Footer.astro';
-import ClosingCard     from '../components/ClosingCard.astro';
-import { getSettings } from '../lib/db';
+import Hero             from '../components/Hero.astro';
+import ClientLogoStrip  from '../components/ClientLogoStrip.astro';
+import Footer           from '../components/Footer.astro';
+import ClosingCard      from '../components/ClosingCard.astro';
+import { getSettings, listPortfolioItems } from '../lib/db';
 import { DEFAULT_SETTINGS } from '../lib/defaultSettings';
 
-const s = await getSettings(Object.keys(DEFAULT_SETTINGS));
+const [s, portfolioItems] = await Promise.all([
+  getSettings(Object.keys(DEFAULT_SETTINGS)),
+  listPortfolioItems({ publishedOnly: true }),
+]);
 const settings = { ...DEFAULT_SETTINGS, ...s };
+
+const clients = portfolioItems
+  .filter(item => item.client_logo)
+  .map(item => ({ name: item.client_name || item.title, logo: item.client_logo }));
 ---
 
 <Layout>
-  <Hero name={settings.site_name} tagline={settings.hero_tagline} />
-
-  <QuoteInterlude />
-
-  <Switzerland dateRange={settings.switzerland.dateRange} paragraphs={settings.switzerland.paragraphs} />
-
-  <div class="film-tick py-2" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span>
-  </div>
-
-  <WorkWithMe
-    email={settings.contact.email}
-    phone={settings.contact.phone}
-    phoneTel={settings.contact.phoneTel}
-    tiktok={settings.socials.tiktok}
-    collaborators={settings.collaborators}
+  <Hero
+    name={settings.site_name}
+    tagline={settings.hero_tagline}
+    mediaType={settings.hero_media.type}
+    mediaUrl={settings.hero_media.url}
   />
+
+  <ClientLogoStrip clients={clients} />
 
   <Footer
     siteName={settings.site_name}

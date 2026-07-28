@@ -1,7 +1,7 @@
 ---
-import Layout  from '../layouts/Layout.astro';
-import About   from '../components/About.astro';
-import Footer  from '../components/Footer.astro';
+import Layout     from '../layouts/Layout.astro';
+import WorkWithMe from '../components/WorkWithMe.astro';
+import Footer     from '../components/Footer.astro';
 import { getSettings } from '../lib/db';
 import { DEFAULT_SETTINGS } from '../lib/defaultSettings';
 
@@ -10,12 +10,18 @@ const settings = { ...DEFAULT_SETTINGS, ...s };
 ---
 
 <Layout
-  title="About — Spencer Lane"
-  description="Filmmaker and photographer based in Tyler, TX. 17, going somewhere."
+  title="Work With Me — Spencer Lane"
+  description="Content creation, brand video, and local business video/photo packages from Spencer Lane."
 >
   <div class="pt-28 md:pt-36"></div>
 
-  <About paragraphs={settings.about_paragraphs} profileImage={settings.about_photo} />
+  <WorkWithMe
+    intro={settings.work_with_me.intro}
+    services={settings.work_with_me.services}
+    email={settings.contact.email}
+    phone={settings.contact.phone}
+    phoneTel={settings.contact.phoneTel}
+  />
 
   <Footer
     siteName={settings.site_name}

@@ -21,7 +21,7 @@ const saved = Astro.url.searchParams.get('saved') === '1';
     </p>
   )}
 
-  <form method="POST" action="/api/admin/settings" class="flex flex-col gap-10">
+  <form method="POST" action="/api/admin/settings" enctype="multipart/form-data" class="flex flex-col gap-10">
 
     <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
       <legend class="font-serif text-lg text-f-ink-deep px-2">Home / hero</legend>
@@ -30,8 +30,25 @@ const saved = Astro.url.searchParams.get('saved') === '1';
         <input class="admin-input" id="site_name" name="site_name" value={settings.site_name} />
       </div>
       <div>
-        <label class="admin-label" for="hero_tagline">Hero tagline</label>
+        <label class="admin-label" for="hero_tagline">Hero quote / tagline</label>
         <input class="admin-input" id="hero_tagline" name="hero_tagline" value={settings.hero_tagline} />
+      </div>
+      <div>
+        <label class="admin-label" for="hero_media_type">Hero background type</label>
+        <select class="admin-select" id="hero_media_type" name="hero_media_type">
+          <option value="image" selected={settings.hero_media.type === 'image'}>Image</option>
+          <option value="video" selected={settings.hero_media.type === 'video'}>Video (autoplay, muted, looping)</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="admin-label" for="hero_media_url">Background URL</label>
+          <input class="admin-input" id="hero_media_url" name="hero_media_url" value={settings.hero_media.url} />
+        </div>
+        <div>
+          <label class="admin-label" for="hero_media_file">...or upload a file</label>
+          <input class="admin-input" id="hero_media_file" name="hero_media_file" type="file" accept="image/*,video/*" />
+        </div>
       </div>
     </fieldset>
 
@@ -41,17 +58,15 @@ const saved = Astro.url.searchParams.get('saved') === '1';
         <label class="admin-label" for="about_paragraphs">Bio (separate paragraphs with a blank line)</label>
         <textarea class="admin-textarea" id="about_paragraphs" name="about_paragraphs" rows="8">{settings.about_paragraphs.join('\n\n')}</textarea>
       </div>
-    </fieldset>
-
-    <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
-      <legend class="font-serif text-lg text-f-ink-deep px-2">Switzerland update</legend>
-      <div>
-        <label class="admin-label" for="switzerland_date_range">Date range</label>
-        <input class="admin-input" id="switzerland_date_range" name="switzerland_date_range" value={settings.switzerland.dateRange} />
-      </div>
-      <div>
-        <label class="admin-label" for="switzerland_paragraphs">Copy (separate paragraphs with a blank line)</label>
-        <textarea class="admin-textarea" id="switzerland_paragraphs" name="switzerland_paragraphs" rows="6">{settings.switzerland.paragraphs.join('\n\n')}</textarea>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="admin-label" for="about_photo">Photo URL</label>
+          <input class="admin-input" id="about_photo" name="about_photo" value={settings.about_photo} />
+        </div>
+        <div>
+          <label class="admin-label" for="about_photo_file">...or upload a photo</label>
+          <input class="admin-input" id="about_photo_file" name="about_photo_file" type="file" accept="image/*" />
+        </div>
       </div>
     </fieldset>
 
@@ -90,10 +105,27 @@ const saved = Astro.url.searchParams.get('saved') === '1';
     </fieldset>
 
     <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
-      <legend class="font-serif text-lg text-f-ink-deep px-2">Past collaborators</legend>
-      <div>
-        <label class="admin-label" for="collaborators">One name per line</label>
-        <textarea class="admin-textarea" id="collaborators" name="collaborators" rows="4">{settings.collaborators.map((c: any) => c.name).join('\n')}</textarea>
+      <legend class="font-serif text-lg text-f-ink-deep px-2">Navigation — which tabs show</legend>
+      <p class="font-sans text-xs text-f-gray -mt-2">
+        Unchecking a tab only removes it from the menu — the page still works if someone has the direct link.
+      </p>
+      <div class="flex flex-col gap-3">
+        <label class="flex items-center gap-2 font-sans text-sm text-f-gray">
+          <input type="checkbox" name="nav_about" checked={settings.nav_visibility.about} />
+          About
+        </label>
+        <label class="flex items-center gap-2 font-sans text-sm text-f-gray">
+          <input type="checkbox" name="nav_portfolio" checked={settings.nav_visibility.portfolio} />
+          Portfolio
+        </label>
+        <label class="flex items-center gap-2 font-sans text-sm text-f-gray">
+          <input type="checkbox" name="nav_shop" checked={settings.nav_visibility.shop} />
+          Shop
+        </label>
+        <label class="flex items-center gap-2 font-sans text-sm text-f-gray">
+          <input type="checkbox" name="nav_work_with_me" checked={settings.nav_visibility.workWithMe} />
+          Work With Me
+        </label>
       </div>
     </fieldset>
 

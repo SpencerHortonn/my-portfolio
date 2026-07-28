@@ -1,0 +1,108 @@
+---
+import type { Testimonial } from '../lib/db';
+interface Props {
+  testimonials: Testimonial[];
+}
+const { testimonials } = Astro.props;
+
+// Give each instance of this component on the page its own unique id, so
+// multiple carousels (e.g. one on /portfolio, one on a case study page)
+// don't fight over the same DOM ids.
+const uid = `tc-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+{testimonials.length > 0 && (
+  <section class="testimonial-carousel py-16 md:py-24 border-y border-f-border/40" aria-label="Testimonials" data-uid={uid}>
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="relative min-h-[200px] flex items-center">
+        {testimonials.map((t, i) => (
+          <div class={`tc-slide ${i === 0 ? 'is-active' : ''} absolute inset-0 flex flex-col items-center text-center reveal`} data-index={i}>
+            <p class="font-serif italic text-xl md:text-2xl font-light text-f-ink leading-snug mb-6">
+              &ldquo;{t.quote}&rdquo;
+            </p>
+            <div class="flex items-center gap-3">
+              {t.photo && (
+                <img src={t.photo} alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy" />
+              )}
+              <div class="text-left">
+                <p class="font-sans text-sm text-f-ink">{t.author_name}</p>
+                {t.author_role && <p class="font-sans text-xs text-f-gray">{t.author_role}</p>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {testimonials.length > 1 && (
+        <div class="flex items-center justify-center gap-2 mt-8">
+          {testimonials.map((_, i) => (
+            <button
+              type="button"
+              class={`tc-dot w-1.5 h-1.5 rounded-full transition-colors ${i === 0 ? 'bg-f-ink' : 'bg-f-border'}`}
+              data-index={i}
+              aria-label={`Show testimonial ${i + 1}`}
+            ></button>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+<script>
+  document.querySelectorAll<HTMLElement>('.testimonial-carousel').forEach(root => {
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('.tc-slide'));
+    const dots = Array.from(root.querySelectorAll<HTMLElement>('.tc-dot'));
+    if (slides.length <= 1) return;
+
+    let current = 0;
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    function show(index: number) {
+      slides.forEach((s, i) => s.classList.toggle('is-active', i === index));
+      dots.forEach((d, i) => {
+        d.classList.toggle('bg-f-ink', i === index);
+        d.classList.toggle('bg-f-border', i !== index);
+      });
+      current = index;
+    }
+
+    function next() {
+      show((current + 1) % slides.length);
+    }
+
+    function startAutoplay() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      timer = setInterval(next, 6000);
+    }
+    function stopAutoplay() {
+      if (timer) clearInterval(timer);
+    }
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        show(i);
+        stopAutoplay();
+        startAutoplay();
+      });
+    });
+
+    root.addEventListener('mouseenter', stopAutoplay);
+    root.addEventListener('mouseleave', startAutoplay);
+
+    startAutoplay();
+  });
+</script>
+
+<style>
+  .tc-slide {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  .tc-slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+  }
+</style>

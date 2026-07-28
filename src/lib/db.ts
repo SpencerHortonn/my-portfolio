@@ -67,6 +67,11 @@ export interface PortfolioItem {
   sort_order: number;
   published: boolean;
   created_at: string;
+  // Case-study fields
+  slug: string;
+  client_name: string;
+  client_logo: string;
+  description: string;
 }
 
 export function listPortfolioItems(opts: { publishedOnly?: boolean } = {}): Promise<PortfolioItem[]> {
@@ -80,16 +85,20 @@ export function getPortfolioItem(id: number): Promise<PortfolioItem | null> {
   return queryOne<PortfolioItem>('select * from portfolio_items where id = $1', [id]);
 }
 
+export function getPortfolioItemBySlug(slug: string): Promise<PortfolioItem | null> {
+  return queryOne<PortfolioItem>('select * from portfolio_items where slug = $1', [slug]);
+}
+
 export function createPortfolioItem(item: Omit<PortfolioItem, 'id' | 'created_at'>): Promise<PortfolioItem> {
   return queryOne<PortfolioItem>(
     `insert into portfolio_items
-      (title, caption, type, orientation, thumbnail, full_url, embed_url, video_file, images, sort_order, published)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      (title, caption, type, orientation, thumbnail, full_url, embed_url, video_file, images, sort_order, published, slug, client_name, client_logo, description)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
      returning *`,
     [
       item.title, item.caption, item.type, item.orientation, item.thumbnail,
       item.full_url, item.embed_url, item.video_file, JSON.stringify(item.images),
-      item.sort_order, item.published,
+      item.sort_order, item.published, item.slug, item.client_name, item.client_logo, item.description,
     ]
   ) as Promise<PortfolioItem>;
 }
@@ -98,13 +107,14 @@ export function updatePortfolioItem(id: number, item: Omit<PortfolioItem, 'id' |
   return queryOne<PortfolioItem>(
     `update portfolio_items set
       title=$1, caption=$2, type=$3, orientation=$4, thumbnail=$5,
-      full_url=$6, embed_url=$7, video_file=$8, images=$9, sort_order=$10, published=$11
-     where id=$12
+      full_url=$6, embed_url=$7, video_file=$8, images=$9, sort_order=$10, published=$11,
+      slug=$12, client_name=$13, client_logo=$14, description=$15
+     where id=$16
      returning *`,
     [
       item.title, item.caption, item.type, item.orientation, item.thumbnail,
       item.full_url, item.embed_url, item.video_file, JSON.stringify(item.images),
-      item.sort_order, item.published, id,
+      item.sort_order, item.published, item.slug, item.client_name, item.client_logo, item.description, id,
     ]
   ) as Promise<PortfolioItem>;
 }
@@ -208,15 +218,82 @@ export function setSetting(key: string, value: any): Promise<void> {
   ).then(() => undefined);
 }
 
-// ── Subscribers ─────────────────────────────────────────────────
+// ── Testimonials ────────────────────────────────────────────────
 
-export function addSubscriber(email: string): Promise<void> {
+export interface Testimonial {
+  id: number;
+  quote: string;
+  author_name: string;
+  author_role: string;
+  photo: string;
+  case_study_id: number | null;
+  sort_order: number;
+  published: boolean;
+  created_at: string;
+}
+
+export function listTestimonials(opts: { publishedOnly?: boolean } = {}): Promise<Testimonial[]> {
+  const where = opts.publishedOnly ? 'where published = true' : '';
+  return query<Testimonial>(
+    `select * from testimonials ${where} order by sort_order asc, id asc`
+  );
+}
+
+export function listTestimonialsForCaseStudy(caseStudyId: number): Promise<Testimonial[]> {
+  return query<Testimonial>(
+    `select * from testimonials where published = true and case_study_id = $1 order by sort_order asc, id asc`,
+    [caseStudyId]
+  );
+}
+
+export function getTestimonial(id: number): Promise<Testimonial | null> {
+  return queryOne<Testimonial>('select * from testimonials where id = $1', [id]);
+}
+
+export function createTestimonial(t: Omit<Testimonial, 'id' | 'created_at'>): Promise<Testimonial> {
+  return queryOne<Testimonial>(
+    `insert into testimonials (quote, author_name, author_role, photo, case_study_id, sort_order, published)
+     values ($1,$2,$3,$4,$5,$6,$7)
+     returning *`,
+    [t.quote, t.author_name, t.author_role, t.photo, t.case_study_id, t.sort_order, t.published]
+  ) as Promise<Testimonial>;
+}
+
+export function updateTestimonial(id: number, t: Omit<Testimonial, 'id' | 'created_at'>): Promise<Testimonial> {
+  return queryOne<Testimonial>(
+    `update testimonials set
+      quote=$1, author_name=$2, author_role=$3, photo=$4, case_study_id=$5, sort_order=$6, published=$7
+     where id=$8
+     returning *`,
+    [t.quote, t.author_name, t.author_role, t.photo, t.case_study_id, t.sort_order, t.published, id]
+  ) as Promise<Testimonial>;
+}
+
+export function deleteTestimonial(id: number): Promise<void> {
+  return query('delete from testimonials where id = $1', [id]).then(() => undefined);
+}
+
+export function setTestimonialOrder(id: number, sortOrder: number): Promise<void> {
+  return query('update testimonials set sort_order = $1 where id = $2', [sortOrder, id]).then(() => undefined);
+}
+
+// ── Contact messages ────────────────────────────────────────────
+
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  message: string;
+  created_at: string;
+}
+
+export function createContactMessage(m: { name: string; email: string; message: string }): Promise<void> {
   return query(
-    'insert into subscribers (email) values ($1) on conflict (email) do nothing',
-    [email]
+    'insert into contact_messages (name, email, message) values ($1, $2, $3)',
+    [m.name, m.email, m.message]
   ).then(() => undefined);
 }
 
-export function listSubscribers(): Promise<{ id: number; email: string; created_at: string }[]> {
-  return query('select * from subscribers order by created_at desc');
+export function listContactMessages(): Promise<ContactMessage[]> {
+  return query<ContactMessage>('select * from contact_messages order by created_at desc');
 }

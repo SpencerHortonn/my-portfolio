@@ -15,6 +15,10 @@ function parseLines(raw: string): string[] {
   return raw.split('\n').map(s => s.trim()).filter(Boolean);
 }
 
+function slugify(title: string): string {
+  return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 export const POST: APIRoute = async ({ request, redirect }) => {
   const form = await request.formData();
   const intent = String(form.get('intent') || '');
@@ -40,6 +44,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   }
 
   const id = form.get('id') ? Number(form.get('id')) : null;
+  const title = String(form.get('title') || '');
 
   let thumbnail = String(form.get('thumbnail') || '');
   const thumbFile = form.get('thumbnail_file');
@@ -47,8 +52,17 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     thumbnail = await uploadFile(thumbFile, 'portfolio');
   }
 
+  let clientLogo = String(form.get('client_logo') || '');
+  const clientLogoFile = form.get('client_logo_file');
+  if (clientLogoFile instanceof File && clientLogoFile.size > 0) {
+    clientLogo = await uploadFile(clientLogoFile, 'portfolio-logos');
+  }
+
+  let slug = String(form.get('slug') || '').trim();
+  if (!slug) slug = slugify(title);
+
   const item: Omit<PortfolioItem, 'id' | 'created_at'> = {
-    title: String(form.get('title') || ''),
+    title,
     caption: String(form.get('caption') || ''),
     type: (String(form.get('type') || 'photo')) as PortfolioItem['type'],
     orientation: (String(form.get('orientation') || 'landscape')) as PortfolioItem['orientation'],
@@ -59,6 +73,10 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     images: parseLines(String(form.get('images') || '')),
     sort_order: Number(form.get('sort_order') || 0),
     published: form.get('published') === 'on',
+    slug,
+    client_name: String(form.get('client_name') || ''),
+    client_logo: clientLogo,
+    description: String(form.get('description') || ''),
   };
 
   if (id) {
