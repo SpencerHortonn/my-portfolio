@@ -1,0 +1,68 @@
+---
+import Layout  from '../layouts/Layout.astro';
+import Footer  from '../components/Footer.astro';
+import { getSettings, listShopProducts } from '../lib/db';
+import { DEFAULT_SETTINGS } from '../lib/defaultSettings';
+
+const [s, products] = await Promise.all([
+  getSettings(Object.keys(DEFAULT_SETTINGS)),
+  listShopProducts({ activeOnly: true }),
+]);
+const settings = { ...DEFAULT_SETTINGS, ...s };
+---
+
+<Layout
+  title="Shop — Spencer Lane"
+  description="Film LUTs and presets from Spencer Lane."
+>
+  <div class="pt-28 md:pt-36"></div>
+
+  <section class="max-w-6xl mx-auto px-6 mb-16">
+    <div class="mb-12 reveal">
+      <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-gray mb-4">Shop</p>
+      <h2 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight">
+        LUTs and presets,<br />
+        made from real film.
+      </h2>
+      <p class="field-note mt-3 ml-1 inline-block">checkout coming soon — sign up to get notified.</p>
+    </div>
+
+    {products.length === 0 ? (
+      <p class="font-sans text-sm text-f-gray">Nothing in the shop yet — check back soon.</p>
+    ) : (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {products.map((p, i) => (
+          <a
+            href={`/shop/${p.slug}`}
+            class={`group block border border-f-border bg-f-white overflow-hidden reveal reveal-d${(i % 3) + 1}`}
+          >
+            <div class="aspect-square overflow-hidden bg-f-paper-warm">
+              {p.cover_image && (
+                <img
+                  src={p.cover_image}
+                  alt={p.title}
+                  class="work-img w-full h-full object-cover in-view"
+                  loading="lazy"
+                />
+              )}
+            </div>
+            <div class="p-4">
+              <p class="font-serif text-base text-f-ink mb-1">{p.title}</p>
+              <p class="font-sans text-sm text-f-gray">${(p.price_cents / 100).toFixed(2)}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <Footer
+    siteName={settings.site_name}
+    email={settings.contact.email}
+    phone={settings.contact.phone}
+    phoneTel={settings.contact.phoneTel}
+    tiktok={settings.socials.tiktok}
+    instagram={settings.socials.instagram}
+    youtube={settings.socials.youtube}
+  />
+</Layout>

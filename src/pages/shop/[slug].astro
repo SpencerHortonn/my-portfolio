@@ -1,0 +1,104 @@
+---
+import Layout  from '../../layouts/Layout.astro';
+import Footer  from '../../components/Footer.astro';
+import { getSettings, getShopProductBySlug } from '../../lib/db';
+import { DEFAULT_SETTINGS } from '../../lib/defaultSettings';
+
+const { slug } = Astro.params;
+const product = slug ? await getShopProductBySlug(slug) : null;
+
+if (!product || product.status !== 'active') {
+  return Astro.redirect('/shop');
+}
+
+const s = await getSettings(Object.keys(DEFAULT_SETTINGS));
+const settings = { ...DEFAULT_SETTINGS, ...s };
+
+const images = [product.cover_image, ...product.gallery].filter(Boolean);
+---
+
+<Layout title={`${product.title} — Shop — Spencer Lane`} description={product.description}>
+  <div class="pt-28 md:pt-36"></div>
+
+  <section class="max-w-6xl mx-auto px-6 mb-24">
+    <a href="/shop" class="font-sans text-xs tracking-[0.15em] uppercase text-f-gray hover:text-f-ink transition-colors inline-block mb-8">← Back to shop</a>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+      <!-- Images -->
+      <div class="reveal">
+        {images.length > 0 ? (
+          <div class="grid gap-3">
+            {images.map(img => (
+              <div class="aspect-square overflow-hidden bg-f-paper-warm">
+                <img src={img} alt={product.title} class="work-img in-view w-full h-full object-cover" loading="lazy" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div class="aspect-square bg-f-paper-warm"></div>
+        )}
+      </div>
+
+      <!-- Details -->
+      <div class="reveal reveal-d1">
+        <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-gray mb-4">Shop</p>
+        <h1 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight mb-4">{product.title}</h1>
+        <p class="font-sans text-2xl text-f-ink mb-8">${(product.price_cents / 100).toFixed(2)}</p>
+
+        {product.description && (
+          <p class="font-sans text-base text-f-gray font-light leading-relaxed mb-10 whitespace-pre-line">{product.description}</p>
+        )}
+
+        <!-- Checkout isn't live yet — collect interest instead -->
+        <form id="notify-form" class="flex flex-col sm:flex-row gap-3" novalidate>
+          <label for="notify-email" class="sr-only">Your email address</label>
+          <input
+            id="notify-email"
+            type="email"
+            placeholder="your@email.com"
+            required
+            autocomplete="email"
+            class="flex-1 px-4 py-3 bg-f-white border border-f-border text-f-ink font-sans text-sm placeholder:text-f-gray/50 focus:outline-none focus:border-f-ink transition-colors"
+          />
+          <button
+            type="submit"
+            class="px-6 py-3 bg-f-ink text-f-white font-sans text-xs tracking-[0.15em] uppercase hover:bg-f-ink/80 transition-colors whitespace-nowrap"
+          >
+            Notify me
+          </button>
+        </form>
+        <p class="font-sans text-xs text-f-gray/50 mt-2">Checkout is coming soon — I'll email you when it's live.</p>
+        <div id="notify-success" class="hidden mt-4 font-sans text-sm text-f-ink">Got it — I'll let you know.</div>
+      </div>
+    </div>
+  </section>
+
+  <Footer
+    siteName={settings.site_name}
+    email={settings.contact.email}
+    phone={settings.contact.phone}
+    phoneTel={settings.contact.phoneTel}
+    tiktok={settings.socials.tiktok}
+    instagram={settings.socials.instagram}
+    youtube={settings.socials.youtube}
+  />
+</Layout>
+
+<script>
+  const form = document.getElementById('notify-form') as HTMLFormElement | null;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (form.querySelector('#notify-email') as HTMLInputElement)?.value || '';
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        document.getElementById('notify-success')?.classList.remove('hidden');
+      }
+    } catch (_) {}
+  });
+</script>

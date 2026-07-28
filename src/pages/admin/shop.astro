@@ -1,0 +1,125 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getShopProduct, listShopProducts } from '../../lib/db';
+
+const products = await listShopProducts();
+
+const editId = Astro.url.searchParams.get('edit');
+const editing = editId ? await getShopProduct(Number(editId)) : null;
+const editingPrice = editing ? (editing.price_cents / 100).toFixed(2) : '';
+---
+
+<AdminLayout title="Shop">
+  <div class="flex items-baseline justify-between mb-8">
+    <h1 class="font-serif text-3xl font-light text-f-ink-deep">Shop</h1>
+    <a href="/shop" target="_blank" class="font-sans text-xs text-f-gray hover:text-f-ink underline">View live page →</a>
+  </div>
+
+  <p class="font-sans text-sm text-f-gray mb-8 max-w-2xl">
+    Checkout isn't wired up yet — products marked <strong>Active</strong> show on the shop page with a
+    "Notify me" button. Fill in <code>Stripe price ID</code> whenever you're ready to flip on real payments.
+  </p>
+
+  <!-- ── Add / edit form ── -->
+  <section class="border border-f-border bg-f-paper-warm p-6 mb-10">
+    <h2 class="font-serif text-xl text-f-ink-deep mb-5">{editing ? `Edit — ${editing.title}` : 'Add new product'}</h2>
+
+    <form method="POST" action="/api/admin/shop" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {editing && <input type="hidden" name="id" value={editing.id} />}
+
+      <div class="md:col-span-2">
+        <label class="admin-label" for="title">Title</label>
+        <input class="admin-input" id="title" name="title" required value={editing?.title ?? ''} placeholder="e.g. Warm Film LUT Pack" />
+      </div>
+
+      <div>
+        <label class="admin-label" for="slug">Slug (for the product URL — leave blank to auto-generate)</label>
+        <input class="admin-input" id="slug" name="slug" value={editing?.slug ?? ''} placeholder="warm-film-lut-pack" />
+      </div>
+      <div>
+        <label class="admin-label" for="price">Price (USD)</label>
+        <input class="admin-input" id="price" name="price" type="number" step="0.01" min="0" value={editingPrice} />
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="admin-label" for="description">Description</label>
+        <textarea class="admin-textarea" id="description" name="description" rows="4">{editing?.description ?? ''}</textarea>
+      </div>
+
+      <div>
+        <label class="admin-label" for="cover_image">Cover image URL</label>
+        <input class="admin-input" id="cover_image" name="cover_image" value={editing?.cover_image ?? ''} />
+      </div>
+      <div>
+        <label class="admin-label" for="cover_image_file">...or upload a cover image</label>
+        <input class="admin-input" id="cover_image_file" name="cover_image_file" type="file" accept="image/*" />
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="admin-label" for="gallery">Extra preview images (one URL per line)</label>
+        <textarea class="admin-textarea" id="gallery" name="gallery" rows="3">{(editing?.gallery ?? []).join('\n')}</textarea>
+      </div>
+
+      <div>
+        <label class="admin-label" for="digital_file">Digital product file (LUTs/presets .zip/.cube)</label>
+        <input class="admin-input" id="digital_file" name="digital_file" type="file" />
+        {editing?.file_url && <p class="font-sans text-xs text-f-gray mt-1">Current file uploaded ✓</p>}
+      </div>
+      <div>
+        <label class="admin-label" for="stripe_price_id">Stripe price ID (optional, for later)</label>
+        <input class="admin-input" id="stripe_price_id" name="stripe_price_id" value={editing?.stripe_price_id ?? ''} placeholder="price_..." />
+      </div>
+
+      <div>
+        <label class="admin-label" for="status">Status</label>
+        <select class="admin-select" id="status" name="status">
+          <option value="draft" selected={editing?.status === 'draft'}>Draft (hidden from shop page)</option>
+          <option value="active" selected={editing?.status === 'active'}>Active (visible on shop page)</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2 flex items-center gap-3">
+        <button type="submit" class="admin-btn">{editing ? 'Save changes' : 'Add product'}</button>
+        {editing && <a href="/admin/shop" class="admin-btn admin-btn-ghost">Cancel</a>}
+      </div>
+    </form>
+  </section>
+
+  <!-- ── List ── -->
+  <section class="flex flex-col gap-3">
+    {products.length === 0 && <p class="font-sans text-sm text-f-gray">No products yet.</p>}
+    {products.map((p, i) => (
+      <div class="border border-f-border bg-white p-4 flex items-center gap-4">
+        {p.cover_image
+          ? <img src={p.cover_image} alt="" class="w-16 h-16 object-cover bg-f-paper-warm flex-shrink-0" />
+          : <div class="w-16 h-16 bg-f-paper-warm flex-shrink-0" />}
+        <div class="flex-1 min-w-0">
+          <p class="font-serif text-base text-f-ink-deep truncate">{p.title}</p>
+          <p class="font-sans text-xs text-f-gray">
+            ${(p.price_cents / 100).toFixed(2)} · {p.status}
+          </p>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <form method="POST" action="/api/admin/shop">
+            <input type="hidden" name="intent" value="move" />
+            <input type="hidden" name="id" value={p.id} />
+            <input type="hidden" name="direction" value="up" />
+            <button type="submit" class="admin-btn admin-btn-ghost" disabled={i === 0} aria-label="Move up">↑</button>
+          </form>
+          <form method="POST" action="/api/admin/shop">
+            <input type="hidden" name="intent" value="move" />
+            <input type="hidden" name="id" value={p.id} />
+            <input type="hidden" name="direction" value="down" />
+            <button type="submit" class="admin-btn admin-btn-ghost" disabled={i === products.length - 1} aria-label="Move down">↓</button>
+          </form>
+          <a href={`/admin/shop?edit=${p.id}`} class="admin-btn admin-btn-ghost">Edit</a>
+          <form method="POST" action="/api/admin/shop" onsubmit="return confirm('Delete this product?')">
+            <input type="hidden" name="intent" value="delete" />
+            <input type="hidden" name="id" value={p.id} />
+            <button type="submit" class="admin-btn admin-btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    ))}
+  </section>
+</AdminLayout>

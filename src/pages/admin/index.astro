@@ -1,0 +1,38 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { ADMIN_COOKIE_NAME, verifySessionToken } from '../../lib/auth';
+
+const token = Astro.cookies.get(ADMIN_COOKIE_NAME)?.value;
+if (verifySessionToken(token)) {
+  return Astro.redirect('/admin/dashboard');
+}
+
+const hasError = Astro.url.searchParams.get('error') === '1';
+---
+
+<AdminLayout title="Sign in" showNav={false}>
+  <div class="max-w-sm mx-auto mt-16">
+    <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-gray mb-4 text-center">Admin</p>
+    <h1 class="font-serif text-3xl font-light text-f-ink-deep mb-8 text-center">Enter password</h1>
+
+    <form method="POST" action="/api/admin/login" class="flex flex-col gap-4">
+      <div>
+        <label for="password" class="admin-label">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          required
+          autofocus
+          class="admin-input"
+        />
+      </div>
+
+      {hasError && (
+        <p class="text-sm text-red-800">Wrong password. Try again.</p>
+      )}
+
+      <button type="submit" class="admin-btn w-full">Enter</button>
+    </form>
+  </div>
+</AdminLayout>

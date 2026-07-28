@@ -1,0 +1,39 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { listPortfolioItems, listShopProducts, listSubscribers } from '../../lib/db';
+
+const [portfolio, products, subscribers] = await Promise.all([
+  listPortfolioItems(),
+  listShopProducts(),
+  listSubscribers(),
+]);
+
+const cards = [
+  { href: '/admin/portfolio', label: 'Portfolio items', count: portfolio.length, desc: 'Films, photos, and galleries shown on /portfolio.' },
+  { href: '/admin/shop', label: 'Shop products', count: products.length, desc: 'LUTs/presets shown on /shop — Stripe-ready, checkout not wired up yet.' },
+  { href: '/admin/subscribers', label: 'Subscribers', count: subscribers.length, desc: 'Emails collected from the Switzerland follow-along form.' },
+  { href: '/admin/settings', label: 'Site settings', count: null, desc: 'Bio, hero tagline, contact info, socials, Switzerland copy.' },
+];
+---
+
+<AdminLayout title="Dashboard">
+  <h1 class="font-serif text-3xl font-light text-f-ink-deep mb-8">Dashboard</h1>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {cards.map(card => (
+      <a href={card.href} class="block border border-f-border bg-f-paper-warm p-6 hover:border-f-ink transition-colors">
+        <div class="flex items-baseline justify-between mb-2">
+          <h2 class="font-serif text-xl text-f-ink-deep">{card.label}</h2>
+          {card.count !== null && (
+            <span class="font-mono text-xs text-f-gray">{card.count}</span>
+          )}
+        </div>
+        <p class="font-sans text-sm text-f-gray">{card.desc}</p>
+      </a>
+    ))}
+  </div>
+
+  <p class="font-sans text-xs text-f-gray mt-10">
+    Changes made here go live immediately — no redeploy needed.
+  </p>
+</AdminLayout>

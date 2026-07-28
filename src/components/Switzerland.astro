@@ -1,5 +1,10 @@
 ---
-// Switzerland — edit copy and image URLs below
+// Switzerland — copy is admin-editable at /admin/settings.
+interface Props {
+  dateRange: string;
+  paragraphs: string[];
+}
+const { dateRange, paragraphs } = Astro.props;
 
 // TODO: replace with real trip photos once you're in Switzerland
 const images = [
@@ -51,7 +56,7 @@ const images = [
       <!-- Copy + form -->
       <div class="reveal reveal-d1">
         <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-gray mb-5">
-          June 28 &ndash; Nov 22, 2026
+          {dateRange}
         </p>
         <h2 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight mb-8">
           Switzerland<br />
@@ -59,22 +64,14 @@ const images = [
         </h2>
 
         <div class="space-y-4 mb-10">
-          <p class="font-sans text-base md:text-[17px] text-f-gray font-light leading-relaxed">
-            On June 28th I leave for Switzerland for YWAM DTS — a five-month discipleship and mission training program that runs through November 22nd. It's not a gap year. It's not a sabbatical. It's where I'm supposed to be, and I can't really explain it better than that.
-          </p>
-          <p class="font-sans text-base md:text-[17px] text-f-gray font-light leading-relaxed">
-            I'll be creating the whole time — the places, the people, whatever God's doing in the middle of it. If you want to follow along, drop your email below. I'll reach out when things go live.
-          </p>
+          {paragraphs.map(p => (
+            <p class="font-sans text-base md:text-[17px] text-f-gray font-light leading-relaxed">{p}</p>
+          ))}
         </div>
 
-        <!--
-          Email signup form — UI only.
-          TODO: wire this up to a real email service before launch.
-          Good options: Mailchimp, ConvertKit, Resend, Loops.so
-        -->
         <form
+          id="switzerland-signup-form"
           class="flex flex-col sm:flex-row gap-3"
-          onsubmit="handleSignup(event)"
           aria-label="Switzerland follow-along signup"
           novalidate
         >
@@ -109,14 +106,23 @@ const images = [
 </section>
 
 <script>
-  // Placeholder submit handler — replace with real API call
-  function handleSignup(e: Event) {
+  const form = document.getElementById('switzerland-signup-form') as HTMLFormElement | null;
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
+    const email = (form.querySelector('#email-signup') as HTMLInputElement)?.value || '';
     const success = document.getElementById('signup-success');
-    form.style.display = 'none';
-    success?.classList.remove('hidden');
-  }
-  // Make it available globally for the inline onsubmit
-  (window as any).handleSignup = handleSignup;
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        success?.classList.remove('hidden');
+      }
+    } catch (_) {
+      // Silently ignore — the form just won't confirm success
+    }
+  });
 </script>

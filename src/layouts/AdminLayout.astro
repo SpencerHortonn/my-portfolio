@@ -1,0 +1,106 @@
+---
+interface Props {
+  title?: string;
+  showNav?: boolean;
+}
+const { title = 'Admin', showNav = true } = Astro.props;
+
+const navItems = [
+  { href: '/admin/dashboard', label: 'Dashboard' },
+  { href: '/admin/portfolio', label: 'Portfolio' },
+  { href: '/admin/shop', label: 'Shop' },
+  { href: '/admin/settings', label: 'Settings' },
+  { href: '/admin/subscribers', label: 'Subscribers' },
+];
+const path = Astro.url.pathname;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>{title} — Admin — Spencer Lane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body class="min-h-screen bg-f-white text-f-ink font-sans antialiased">
+  {showNav && (
+    <header class="border-b border-f-border bg-f-paper-warm">
+      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-6 flex-wrap">
+        <a href="/admin/dashboard" class="font-serif italic text-xl text-f-ink-deep">Spencer Lane — Admin</a>
+        <nav class="flex items-center gap-5 flex-wrap">
+          {navItems.map(item => (
+            <a
+              href={item.href}
+              class={`font-sans text-xs tracking-[0.1em] uppercase ${path === item.href ? 'text-f-ink font-semibold' : 'text-f-gray hover:text-f-ink'} transition-colors`}
+            >
+              {item.label}
+            </a>
+          ))}
+          <form method="POST" action="/api/admin/logout">
+            <button type="submit" class="font-sans text-xs tracking-[0.1em] uppercase text-f-gray hover:text-f-ink transition-colors">
+              Log out
+            </button>
+          </form>
+        </nav>
+      </div>
+    </header>
+  )}
+
+  <main class="max-w-5xl mx-auto px-6 py-10">
+    <slot />
+  </main>
+
+  <style is:global>
+    .admin-input, .admin-textarea, .admin-select {
+      width: 100%;
+      background: #fff;
+      border: 1px solid #BFB39C;
+      padding: 10px 12px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      color: #1F1C18;
+    }
+    .admin-input:focus, .admin-textarea:focus, .admin-select:focus {
+      outline: none;
+      border-color: #1F1C18;
+    }
+    .admin-label {
+      display: block;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6B6357;
+      margin-bottom: 6px;
+    }
+    .admin-btn {
+      display: inline-block;
+      background: #1F1C18;
+      color: #E8DFD0;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+    .admin-btn:hover { background: #3a352c; }
+    .admin-btn-ghost {
+      background: transparent;
+      color: #6B6357;
+      border: 1px solid #BFB39C;
+    }
+    .admin-btn-ghost:hover { color: #1F1C18; border-color: #1F1C18; }
+    .admin-btn-danger { background: #7a2e2e; color: #fff; }
+    .admin-btn-danger:hover { background: #5c2222; }
+  </style>
+</body>
+</html>

@@ -1,0 +1,34 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { listSubscribers } from '../../lib/db';
+
+const subscribers = await listSubscribers();
+---
+
+<AdminLayout title="Subscribers">
+  <h1 class="font-serif text-3xl font-light text-f-ink-deep mb-2">Subscribers</h1>
+  <p class="font-sans text-sm text-f-gray mb-8">
+    Emails collected from the Switzerland follow-along form on the home page.
+  </p>
+
+  {subscribers.length === 0 ? (
+    <p class="font-sans text-sm text-f-gray">No signups yet.</p>
+  ) : (
+    <table class="w-full border border-f-border bg-white text-sm">
+      <thead>
+        <tr class="border-b border-f-border bg-f-paper-warm text-left">
+          <th class="p-3 font-sans text-xs tracking-[0.08em] uppercase text-f-gray">Email</th>
+          <th class="p-3 font-sans text-xs tracking-[0.08em] uppercase text-f-gray">Joined</th>
+        </tr>
+      </thead>
+      <tbody>
+        {subscribers.map(sub => (
+          <tr class="border-b border-f-border last:border-b-0">
+            <td class="p-3 font-sans text-f-ink">{sub.email}</td>
+            <td class="p-3 font-sans text-f-gray">{new Date(sub.created_at).toLocaleDateString()}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+</AdminLayout>

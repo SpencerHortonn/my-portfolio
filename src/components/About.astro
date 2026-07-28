@@ -1,9 +1,8 @@
 ---
-const paragraphs = [
-  `I'm 17, based in Tyler, Texas, and I've been making things with a camera long enough that it stopped feeling like a hobby and started feeling like the only thing that made sense. Films, photos, short-form content — I care about what a frame makes you feel, not how it performs.`,
-  `I'm not interested in building a career that looks good on paper but costs everything else. I'd rather make work that means something and figure out the money as it comes than flip that around. That's not a philosophy I picked up somewhere. It's just what's been true every time I've been honest about it.`,
-  `This June I'm heading to Switzerland for YWAM DTS — five months through November. It's not a gap year. It's not an escape. It's where I'm supposed to be, and I can't really explain it better than that. I'm bringing my camera.`,
-];
+interface Props {
+  paragraphs: string[];
+}
+const { paragraphs } = Astro.props;
 
 const profileImage = '/image%20for%20about%20me.JPG';
 ---

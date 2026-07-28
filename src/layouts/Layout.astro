@@ -10,6 +10,15 @@ const {
   title       = 'Spencer Lane — Filmmaker & Photographer',
   description = 'Filmmaker, photographer, and short-form creator based in Tyler, TX. 17, going somewhere.',
 } = Astro.props;
+
+const navItems = [
+  { href: '/',          label: 'Home' },
+  { href: '/about',     label: 'About' },
+  { href: '/portfolio', label: 'Portfolio' },
+  { href: '/shop',      label: 'Shop' },
+];
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 ---
 
 <!DOCTYPE html>
@@ -75,25 +84,20 @@ const {
       <span class="tc">24.00 FPS &middot; 01:17:04</span>
     </div>
 
-    <!-- Brand / reel / links row -->
+    <!-- Brand / links / contact row -->
     <div class="film-inner">
-      <a href="#hero" class="film-brand" aria-label="Spencer Lane, home">
+      <a href="/" class="film-brand" aria-label="Spencer Lane, home">
         <span class="name">Spencer Lane</span>
         <span class="role">Film &amp; Photography</span>
       </a>
 
-      <div class="reel hidden md:flex" aria-hidden="true">
-        <span>Scene</span>
-        <span class="circle">i</span>
-        <span>Index</span>
-      </div>
-
       <ul class="film-links hidden md:flex">
-        <li><a href="#work">Work</a></li>
-        <li><a href="#switzerland">Switzerland</a></li>
-        <li><a href="#work-with-me">Work with me</a></li>
-        <li><a href="#contact">Contact</a></li>
+        {navItems.map(item => (
+          <li><a href={item.href} class={isActive(item.href) ? 'is-active' : ''}>{item.label}</a></li>
+        ))}
       </ul>
+
+      <a href="/#work-with-me" class="film-contact hidden md:inline-block">Contact</a>
 
       <!-- Mobile hamburger -->
       <button id="mobile-menu-btn" class="md:hidden text-f-ink ml-auto" aria-label="Open menu" aria-expanded="false">
@@ -108,10 +112,10 @@ const {
     <!-- Mobile menu -->
     <div id="mobile-menu" class="hidden md:hidden border-t border-f-border px-6 py-6" style="background:rgba(232,223,208,0.97);">
       <ul class="flex flex-col gap-5">
-        <li><a href="#work"         class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Work</a></li>
-        <li><a href="#switzerland"  class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Switzerland</a></li>
-        <li><a href="#work-with-me" class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Work with me</a></li>
-        <li><a href="mailto:spencerhortonmedia@gmail.com" class="text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Contact</a></li>
+        {navItems.map(item => (
+          <li><a href={item.href} class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">{item.label}</a></li>
+        ))}
+        <li><a href="/#work-with-me" class="mobile-nav-link text-xs tracking-[0.15em] uppercase font-medium text-f-gray">Contact</a></li>
       </ul>
     </div>
 
@@ -181,7 +185,7 @@ const {
     .film-nav .film-slate .mid { color: #6B6357; letter-spacing: 0.24em; }
     .film-nav .film-slate .tc  { font-variant-numeric: tabular-nums; color: #1F1C18; }
 
-    /* Inner brand / reel / links row */
+    /* Inner brand / links / contact row */
     .film-nav .film-inner {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
@@ -231,49 +235,14 @@ const {
     }
 
     /* Reel dial (center) */
-    .film-nav .reel {
-      justify-self: center;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #6B6357;
-      padding-bottom: 4px;
-    }
-    .film-nav .reel .circle {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 1px solid #A89B84;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Fraunces', Georgia, serif;
-      font-style: italic;
-      font-weight: 300;
-      font-size: 14px;
-      color: #1F1C18;
-      letter-spacing: 0;
-      position: relative;
-    }
-    .film-nav .reel .circle::before {
-      content: "";
-      position: absolute;
-      inset: 4px;
-      border-radius: 50%;
-      border: 1px dashed #BFB39C;
-    }
-
-    /* Nav links (right) */
+    /* Nav links (center) */
     .film-nav .film-links {
+      justify-self: center;
       list-style: none;
       margin: 0;
       padding: 0;
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       align-items: baseline;
       gap: 32px;
       counter-reset: fnav;
@@ -310,8 +279,26 @@ const {
       transform-origin: left center;
       transition: transform 520ms cubic-bezier(.2,.6,.2,1);
     }
-    .film-nav .film-links a:hover { color: #1F1C18; }
-    .film-nav .film-links a:hover::after { transform: scaleX(1); }
+    .film-nav .film-links a:hover,
+    .film-nav .film-links a.is-active { color: #1F1C18; }
+    .film-nav .film-links a:hover::after,
+    .film-nav .film-links a.is-active::after { transform: scaleX(1); }
+
+    /* Contact link (right) */
+    .film-nav .film-contact {
+      justify-self: end;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #6B6357;
+      text-decoration: none;
+      padding: 4px 0;
+      transition: color 320ms ease;
+      white-space: nowrap;
+    }
+    .film-nav .film-contact:hover { color: #1F1C18; }
 
     /* Sprocket rail */
     .film-nav .rail {

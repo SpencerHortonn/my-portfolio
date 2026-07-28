@@ -1,0 +1,47 @@
+---
+import Layout  from '../layouts/Layout.astro';
+import Work    from '../components/Work.astro';
+import Footer  from '../components/Footer.astro';
+import { getSettings, listPortfolioItems } from '../lib/db';
+import { DEFAULT_SETTINGS } from '../lib/defaultSettings';
+
+const [s, items] = await Promise.all([
+  getSettings(Object.keys(DEFAULT_SETTINGS)),
+  listPortfolioItems({ publishedOnly: true }),
+]);
+const settings = { ...DEFAULT_SETTINGS, ...s };
+---
+
+<Layout
+  title="Portfolio — Spencer Lane"
+  description="Films, photos, and a showreel from Spencer Lane — filmmaker and photographer based in Tyler, TX."
+>
+  <div class="pt-28 md:pt-36"></div>
+
+  <!-- ── Showreel — placeholder until the real reel is cut ── -->
+  <section class="max-w-6xl mx-auto px-6 mb-8 md:mb-16">
+    <div class="reveal relative aspect-video w-full overflow-hidden flex items-center justify-center" style="background: #1F1B16;">
+      <div class="absolute inset-0 opacity-30" style="background: radial-gradient(ellipse at 50% 40%, rgba(232,223,208,0.12), transparent 70%);" aria-hidden="true"></div>
+      <div class="relative text-center px-6">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" class="mx-auto mb-5 opacity-60">
+          <circle cx="26" cy="26" r="25" stroke="#E8DFD0" stroke-width="1.2"/>
+          <polygon points="21,17 37,26 21,35" fill="#E8DFD0"/>
+        </svg>
+        <p class="font-serif italic text-2xl md:text-3xl text-f-white mb-2">Showreel coming soon</p>
+        <p class="font-sans text-xs tracking-[0.2em] uppercase text-f-white/40">Specific projects below</p>
+      </div>
+    </div>
+  </section>
+
+  <Work items={items} />
+
+  <Footer
+    siteName={settings.site_name}
+    email={settings.contact.email}
+    phone={settings.contact.phone}
+    phoneTel={settings.contact.phoneTel}
+    tiktok={settings.socials.tiktok}
+    instagram={settings.socials.instagram}
+    youtube={settings.socials.youtube}
+  />
+</Layout>

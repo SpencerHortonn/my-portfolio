@@ -1,0 +1,104 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getSettings } from '../../lib/db';
+import { DEFAULT_SETTINGS } from '../../lib/defaultSettings';
+
+const s = await getSettings(Object.keys(DEFAULT_SETTINGS));
+const settings = { ...DEFAULT_SETTINGS, ...s };
+
+const saved = Astro.url.searchParams.get('saved') === '1';
+---
+
+<AdminLayout title="Settings">
+  <h1 class="font-serif text-3xl font-light text-f-ink-deep mb-2">Site settings</h1>
+  <p class="font-sans text-sm text-f-gray mb-8">
+    Everything here shows up somewhere on the public site — save to publish immediately.
+  </p>
+
+  {saved && (
+    <p class="font-sans text-sm text-green-800 bg-green-50 border border-green-800/30 px-4 py-2 mb-6 inline-block">
+      Saved.
+    </p>
+  )}
+
+  <form method="POST" action="/api/admin/settings" class="flex flex-col gap-10">
+
+    <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
+      <legend class="font-serif text-lg text-f-ink-deep px-2">Home / hero</legend>
+      <div>
+        <label class="admin-label" for="site_name">Site name</label>
+        <input class="admin-input" id="site_name" name="site_name" value={settings.site_name} />
+      </div>
+      <div>
+        <label class="admin-label" for="hero_tagline">Hero tagline</label>
+        <input class="admin-input" id="hero_tagline" name="hero_tagline" value={settings.hero_tagline} />
+      </div>
+    </fieldset>
+
+    <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
+      <legend class="font-serif text-lg text-f-ink-deep px-2">About page</legend>
+      <div>
+        <label class="admin-label" for="about_paragraphs">Bio (separate paragraphs with a blank line)</label>
+        <textarea class="admin-textarea" id="about_paragraphs" name="about_paragraphs" rows="8">{settings.about_paragraphs.join('\n\n')}</textarea>
+      </div>
+    </fieldset>
+
+    <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
+      <legend class="font-serif text-lg text-f-ink-deep px-2">Switzerland update</legend>
+      <div>
+        <label class="admin-label" for="switzerland_date_range">Date range</label>
+        <input class="admin-input" id="switzerland_date_range" name="switzerland_date_range" value={settings.switzerland.dateRange} />
+      </div>
+      <div>
+        <label class="admin-label" for="switzerland_paragraphs">Copy (separate paragraphs with a blank line)</label>
+        <textarea class="admin-textarea" id="switzerland_paragraphs" name="switzerland_paragraphs" rows="6">{settings.switzerland.paragraphs.join('\n\n')}</textarea>
+      </div>
+    </fieldset>
+
+    <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
+      <legend class="font-serif text-lg text-f-ink-deep px-2">Contact & socials</legend>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="admin-label" for="contact_email">Email</label>
+          <input class="admin-input" id="contact_email" name="contact_email" value={settings.contact.email} />
+        </div>
+        <div>
+          <label class="admin-label" for="contact_phone">Phone (display)</label>
+          <input class="admin-input" id="contact_phone" name="contact_phone" value={settings.contact.phone} />
+        </div>
+        <div>
+          <label class="admin-label" for="contact_phone_tel">Phone (tel: link)</label>
+          <input class="admin-input" id="contact_phone_tel" name="contact_phone_tel" value={settings.contact.phoneTel} placeholder="tel:+1..." />
+        </div>
+        <div>
+          <label class="admin-label" for="contact_location">Location</label>
+          <input class="admin-input" id="contact_location" name="contact_location" value={settings.contact.location} />
+        </div>
+        <div>
+          <label class="admin-label" for="social_tiktok">TikTok URL</label>
+          <input class="admin-input" id="social_tiktok" name="social_tiktok" value={settings.socials.tiktok} />
+        </div>
+        <div>
+          <label class="admin-label" for="social_instagram">Instagram URL</label>
+          <input class="admin-input" id="social_instagram" name="social_instagram" value={settings.socials.instagram} />
+        </div>
+        <div>
+          <label class="admin-label" for="social_youtube">YouTube URL</label>
+          <input class="admin-input" id="social_youtube" name="social_youtube" value={settings.socials.youtube} />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
+      <legend class="font-serif text-lg text-f-ink-deep px-2">Past collaborators</legend>
+      <div>
+        <label class="admin-label" for="collaborators">One name per line</label>
+        <textarea class="admin-textarea" id="collaborators" name="collaborators" rows="4">{settings.collaborators.map((c: any) => c.name).join('\n')}</textarea>
+      </div>
+    </fieldset>
+
+    <div>
+      <button type="submit" class="admin-btn">Save all changes</button>
+    </div>
+  </form>
+</AdminLayout>

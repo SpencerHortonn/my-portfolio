@@ -1,5 +1,9 @@
 ---
-import { workItems } from '../config/content';
+import type { PortfolioItem } from '../lib/db';
+interface Props {
+  items: PortfolioItem[];
+}
+const { items: workItems } = Astro.props;
 ---
 
 <section id="work" class="py-16 md:py-28">
@@ -176,7 +180,7 @@ import { workItems } from '../config/content';
       // Single photo
       lightboxContent.innerHTML = `
         <img
-          src="${item.fullUrl || item.thumbnail}"
+          src="${item.full_url || item.thumbnail}"
           alt="${item.title}"
           class="w-full max-h-[80vh] object-contain"
         />`;
@@ -219,12 +223,12 @@ import { workItems } from '../config/content';
 
   // ── Video ──
   function renderVideo(item: Record<string, any>) {
-    if (item.embedUrl) {
+    if (item.embed_url) {
       // YouTube / Vimeo embed
       lightboxContent.innerHTML = `
         <div class="aspect-video w-full">
           <iframe
-            src="${item.embedUrl}"
+            src="${item.embed_url}"
             class="w-full h-full"
             frameborder="0"
             allow="autoplay; fullscreen; picture-in-picture"
@@ -232,7 +236,7 @@ import { workItems } from '../config/content';
             title="${item.title}"
           ></iframe>
         </div>`;
-    } else if (item.videoFile) {
+    } else if (item.video_file) {
       // Local file — plays on localhost, too large for Vercel static deploy
       lightboxContent.innerHTML = `
         <div class="aspect-video w-full bg-black flex items-center justify-center">
@@ -242,8 +246,8 @@ import { workItems } from '../config/content';
             class="w-full h-full max-h-[80vh]"
             style="opacity:1;"
           >
-            <source src="${item.videoFile}" type="video/quicktime" />
-            <source src="${item.videoFile}" type="video/mp4" />
+            <source src="${item.video_file}" type="video/quicktime" />
+            <source src="${item.video_file}" type="video/mp4" />
             <p class="text-white/60 text-sm font-sans p-8">
               Your browser doesn't support this video format.
               Upload to YouTube/Vimeo for cross-browser playback.

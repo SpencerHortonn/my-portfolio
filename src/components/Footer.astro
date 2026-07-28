@@ -1,5 +1,14 @@
 ---
-import { site, socials } from '../config/content';
+interface Props {
+  siteName: string;
+  email: string;
+  phone: string;
+  phoneTel: string;
+  tiktok: string;
+  instagram: string;
+  youtube: string;
+}
+const { siteName, email, phone, phoneTel, tiktok, instagram, youtube } = Astro.props;
 ---
 
 <footer class="border-t border-f-border/40 py-16">
@@ -9,18 +18,18 @@ import { site, socials } from '../config/content';
 
       <!-- Brand + contact -->
       <div class="flex flex-col gap-1">
-        <p class="font-serif italic text-2xl text-f-ink mb-1">{site.name}</p>
+        <p class="font-serif italic text-2xl text-f-ink mb-1">{siteName}</p>
         <a
-          href={`mailto:${site.email}`}
+          href={`mailto:${email}`}
           class="font-sans text-sm text-f-gray hover:text-f-ink transition-colors"
         >
-          {site.email}
+          {email}
         </a>
         <a
-          href={site.phoneTel}
+          href={phoneTel}
           class="font-sans text-sm text-f-gray hover:text-f-ink transition-colors"
         >
-          {site.phone}
+          {phone}
         </a>
       </div>
 
@@ -29,7 +38,7 @@ import { site, socials } from '../config/content';
         <ul class="flex items-center gap-8">
           <li>
             <a
-              href={socials.tiktok}
+              href={tiktok}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="TikTok — @spencerchicken"
@@ -40,7 +49,7 @@ import { site, socials } from '../config/content';
           </li>
           <li>
             <a
-              href={socials.instagram}
+              href={instagram}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram — @spencerchicken"
@@ -51,7 +60,7 @@ import { site, socials } from '../config/content';
           </li>
           <li>
             <a
-              href={socials.youtube}
+              href={youtube}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="YouTube — @spencerchicken"
