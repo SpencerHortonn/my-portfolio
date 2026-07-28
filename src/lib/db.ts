@@ -6,19 +6,34 @@ declare global {
   var __pgPool: Pool | undefined;
 }
 
+// Supabase/Neon poolers use certs that aren't in Node's default trust store.
+// An embedded `sslmode` query param takes priority over the `ssl` option we
+// pass to `Pool`, so strip it and rely on our own permissive setting instead.
+function stripSslMode(connStr: string): string {
+  try {
+    const url = new URL(connStr);
+    url.searchParams.delete('sslmode');
+    return url.toString();
+  } catch {
+    return connStr;
+  }
+}
+
 function getPool(): Pool {
   if (!globalThis.__pgPool) {
     // POSTGRES_URL / POSTGRES_URL_NON_POOLING are what Vercel's Supabase/Neon
     // marketplace integrations inject automatically — DATABASE_URL is the
     // generic name we ask for in README if you set it up by hand instead.
-    const connectionString =
+    const rawConnectionString =
       process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
-    if (!connectionString) {
+    if (!rawConnectionString) {
       throw new Error('DATABASE_URL (or POSTGRES_URL) is not set — see README for setup.');
     }
+    const isLocal = rawConnectionString.includes('localhost') || rawConnectionString.includes('127.0.0.1');
+    const connectionString = isLocal ? rawConnectionString : stripSslMode(rawConnectionString);
     globalThis.__pgPool = new Pool({
       connectionString,
-      ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false },
+      ssl: isLocal ? false : { rejectUnauthorized: false },
       max: 5,
     });
   }

@@ -2,16 +2,26 @@
 // Usage: DATABASE_URL="..." node scripts/seed.mjs
 import pg from 'pg';
 
-const connectionString =
+const rawConnectionString =
   process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
-if (!connectionString) {
+if (!rawConnectionString) {
   console.error('Set DATABASE_URL first, e.g.\n  DATABASE_URL="..." node scripts/seed.mjs');
   process.exit(1);
 }
 
+// An embedded `sslmode` query param overrides the `ssl` option below, and
+// Supabase/Neon pooler certs aren't in Node's default trust store — strip it.
+const isLocal = rawConnectionString.includes('localhost') || rawConnectionString.includes('127.0.0.1');
+let connectionString = rawConnectionString;
+if (!isLocal) {
+  const url = new URL(rawConnectionString);
+  url.searchParams.delete('sslmode');
+  connectionString = url.toString();
+}
+
 const pool = new pg.Pool({
   connectionString,
-  ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false },
+  ssl: isLocal ? false : { rejectUnauthorized: false },
 });
 
 const workItems = [
