@@ -1,12 +1,13 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { listContactMessages, listPortfolioItems, listShopProducts, listTestimonials } from '../../lib/db';
+import { getAnalyticsTotals, listContactMessages, listPortfolioItems, listShopProducts, listTestimonials } from '../../lib/db';
 
-const [portfolio, products, testimonials, messages] = await Promise.all([
+const [portfolio, products, testimonials, messages, analytics] = await Promise.all([
   listPortfolioItems(),
   listShopProducts(),
   listTestimonials(),
   listContactMessages(),
+  getAnalyticsTotals(),
 ]);
 
 const cards = [
@@ -15,6 +16,7 @@ const cards = [
   { href: '/admin/shop', label: 'Shop products', count: products.length, desc: 'LUTs/presets shown on /shop — Stripe-ready, checkout not wired up yet.' },
   { href: '/admin/work-with-me', label: 'Work With Me', count: null, desc: 'Intro copy and services list shown on /work-with-me.' },
   { href: '/admin/messages', label: 'Messages', count: messages.length, desc: 'Contact form submissions — also emailed to you directly.' },
+  { href: '/admin/analytics', label: 'Analytics', count: analytics.last30, desc: `Visitor tracking — ${analytics.last30.toLocaleString()} views in the last 30 days.` },
   { href: '/admin/settings', label: 'Site settings', count: null, desc: 'Hero media, bio, contact info, socials, and which nav tabs show.' },
 ];
 ---

@@ -65,6 +65,17 @@ create table if not exists contact_messages (
   created_at timestamptz not null default now()
 );
 
+create table if not exists page_views (
+  id         serial primary key,
+  path       text not null,
+  referrer   text not null default '',
+  user_agent text not null default '',
+  visitor_id text not null default '',
+  created_at timestamptz not null default now()
+);
+
 create index if not exists idx_portfolio_items_sort on portfolio_items (sort_order, id);
 create index if not exists idx_shop_products_sort on shop_products (sort_order, id);
 create index if not exists idx_testimonials_sort on testimonials (sort_order, id);
+create index if not exists idx_page_views_created on page_views (created_at);
+create index if not exists idx_page_views_path on page_views (path);

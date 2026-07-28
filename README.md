@@ -28,7 +28,7 @@ Set all five in the Vercel dashboard (Project → Settings → Environment Varia
 
 ## One-time database setup
 
-Run `src/lib/schema.sql` once against your Postgres database (Supabase's SQL editor, or `psql "$DATABASE_URL" -f src/lib/schema.sql`) to create all tables — it's safe to re-run any time since everything uses `if not exists`. If you're upgrading an existing database that predates the case-studies/testimonials update, run `src/lib/migrations/002_case_studies.sql` instead (adds the new columns/tables additively, no data loss).
+Run `src/lib/schema.sql` once against your Postgres database (Supabase's SQL editor, or `psql "$DATABASE_URL" -f src/lib/schema.sql`) to create all tables — it's safe to re-run any time since everything uses `if not exists`. If you're upgrading an existing database, run whichever `src/lib/migrations/*.sql` files you haven't applied yet, in order (each is additive — no data loss).
 
 **Note:** Supabase's SQL editor rejects multi-statement pastes — run each statement one at a time if you hit that error.
 
@@ -45,6 +45,7 @@ Go to `/admin`, enter the password, and you'll land on the dashboard:
 - **Shop** — add/edit/delete/reorder digital products (LUTs/presets) shown on `/shop`. Products marked **Active** appear publicly with a "Notify me" button (no real checkout yet — see below).
 - **Work With Me** — the intro paragraph and services list shown on `/work-with-me`.
 - **Messages** — contact form submissions (also emailed to you directly via Resend).
+- **Analytics** — self-hosted visitor tracking (no third-party service). Page views + unique visitors for today/7/30 days/all-time, a daily views chart for the last 30 days, and top pages. Tracked via `src/middleware.ts` on every real page request (not admin/API/assets) using a first-party `visitor_id` cookie.
 - **Settings** — hero background (image or video) + tagline, About bio/photo, contact info, socials, and checkboxes for which nav tabs are visible (hiding a tab just removes it from the menu — the page still works via direct link).
 
 Every save takes effect on the live site immediately — no rebuild or redeploy needed.

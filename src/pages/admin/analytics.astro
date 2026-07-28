@@ -1,0 +1,126 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getAnalyticsTotals, getDailyViewCounts, getTopPaths } from '../../lib/db';
+
+const [totals, daily, topPaths] = await Promise.all([
+  getAnalyticsTotals(),
+  getDailyViewCounts(30),
+  getTopPaths(30, 10),
+]);
+
+const maxCount = Math.max(1, ...daily.map(d => d.count));
+
+function formatDate(iso: string): string {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+const stats = [
+  { label: 'Today', views: totals.today, unique: totals.uniqueToday },
+  { label: 'Last 7 days', views: totals.last7, unique: totals.unique7 },
+  { label: 'Last 30 days', views: totals.last30, unique: totals.unique30 },
+  { label: 'All time', views: totals.allTime, unique: totals.uniqueAllTime },
+];
+---
+
+<AdminLayout title="Analytics">
+  <h1 class="font-serif text-3xl font-light text-f-ink-deep mb-2">Analytics</h1>
+  <p class="font-sans text-sm text-f-gray mb-8">
+    Self-hosted visitor tracking — no third-party service. "Unique" counts distinct visitors (via a first-party cookie), not distinct IPs.
+  </p>
+
+  <!-- ── Stat tiles ── -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+    {stats.map(s => (
+      <div class="border border-f-border bg-f-paper-warm p-5">
+        <p class="font-sans text-xs tracking-[0.1em] uppercase text-f-gray mb-2">{s.label}</p>
+        <p class="font-serif text-3xl text-f-ink-deep leading-none mb-1">{s.views.toLocaleString()}</p>
+        <p class="font-sans text-xs text-f-gray">{s.unique.toLocaleString()} unique</p>
+      </div>
+    ))}
+  </div>
+
+  <!-- ── Daily views chart ── -->
+  <section class="border border-f-border bg-white p-6 mb-10">
+    <div class="flex items-baseline justify-between mb-6">
+      <h2 class="font-serif text-xl text-f-ink-deep">Views per day — last 30 days</h2>
+      <button type="button" id="toggle-table" class="font-sans text-xs text-f-gray hover:text-f-ink underline">
+        View as table
+      </button>
+    </div>
+
+    <div id="chart-view" role="img" aria-label="Bar chart of page views per day over the last 30 days">
+      <div class="flex items-end gap-[3px] h-48">
+        {daily.map(d => (
+          <div class="group relative flex-1 h-full flex flex-col justify-end">
+            <div
+              class="w-full bg-f-ink rounded-t-sm group-hover:bg-f-gray transition-colors"
+              style={`height: ${d.count > 0 ? Math.max((d.count / maxCount) * 100, 4) : 1}%`}
+              title={`${formatDate(d.date)}: ${d.count} view${d.count === 1 ? '' : 's'}`}
+            ></div>
+          </div>
+        ))}
+      </div>
+      <div class="flex justify-between mt-3 font-sans text-xs text-f-gray">
+        <span>{formatDate(daily[0].date)}</span>
+        <span>{formatDate(daily[daily.length - 1].date)}</span>
+      </div>
+    </div>
+
+    <div id="table-view" class="hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-f-border text-left">
+            <th class="py-2 font-sans text-xs tracking-[0.08em] uppercase text-f-gray">Date</th>
+            <th class="py-2 font-sans text-xs tracking-[0.08em] uppercase text-f-gray">Views</th>
+          </tr>
+        </thead>
+        <tbody>
+          {daily.slice().reverse().map(d => (
+            <tr class="border-b border-f-border/50">
+              <td class="py-1.5 font-sans text-f-ink">{formatDate(d.date)}</td>
+              <td class="py-1.5 font-sans text-f-gray">{d.count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Top pages ── -->
+  <section class="border border-f-border bg-white p-6">
+    <h2 class="font-serif text-xl text-f-ink-deep mb-5">Top pages — last 30 days</h2>
+    {topPaths.length === 0 ? (
+      <p class="font-sans text-sm text-f-gray">No page views recorded yet.</p>
+    ) : (
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-f-border text-left">
+            <th class="py-2 font-sans text-xs tracking-[0.08em] uppercase text-f-gray">Page</th>
+            <th class="py-2 font-sans text-xs tracking-[0.08em] uppercase text-f-gray">Views</th>
+          </tr>
+        </thead>
+        <tbody>
+          {topPaths.map(p => (
+            <tr class="border-b border-f-border/50">
+              <td class="py-1.5 font-sans text-f-ink">{p.path}</td>
+              <td class="py-1.5 font-sans text-f-gray">{p.count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </section>
+</AdminLayout>
+
+<script>
+  const toggleBtn = document.getElementById('toggle-table');
+  const chartView = document.getElementById('chart-view');
+  const tableView = document.getElementById('table-view');
+  toggleBtn?.addEventListener('click', () => {
+    const showingTable = !tableView?.classList.contains('hidden');
+    tableView?.classList.toggle('hidden', showingTable);
+    chartView?.classList.toggle('hidden', !showingTable);
+    if (toggleBtn) toggleBtn.textContent = showingTable ? 'View as table' : 'View as chart';
+  });
+</script>

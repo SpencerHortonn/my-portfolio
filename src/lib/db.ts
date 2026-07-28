@@ -297,3 +297,73 @@ export function createContactMessage(m: { name: string; email: string; message: 
 export function listContactMessages(): Promise<ContactMessage[]> {
   return query<ContactMessage>('select * from contact_messages order by created_at desc');
 }
+
+// ── Analytics ────────────────────────────────────────────────────
+
+export function recordPageView(v: { path: string; referrer: string; userAgent: string; visitorId: string }): Promise<void> {
+  return query(
+    'insert into page_views (path, referrer, user_agent, visitor_id) values ($1, $2, $3, $4)',
+    [v.path, v.referrer, v.userAgent, v.visitorId]
+  ).then(() => undefined);
+}
+
+export interface AnalyticsTotals {
+  today: number;
+  last7: number;
+  last30: number;
+  allTime: number;
+  uniqueToday: number;
+  unique7: number;
+  unique30: number;
+  uniqueAllTime: number;
+}
+
+export async function getAnalyticsTotals(): Promise<AnalyticsTotals> {
+  const row = await queryOne<{
+    today: string; last7: string; last30: string; all_time: string;
+    unique_today: string; unique_7: string; unique_30: string; unique_all_time: string;
+  }>(`
+    select
+      count(*) filter (where created_at >= now() - interval '1 day')   as today,
+      count(*) filter (where created_at >= now() - interval '7 days')  as last7,
+      count(*) filter (where created_at >= now() - interval '30 days') as last30,
+      count(*)                                                        as all_time,
+      count(distinct visitor_id) filter (where created_at >= now() - interval '1 day')   as unique_today,
+      count(distinct visitor_id) filter (where created_at >= now() - interval '7 days')  as unique_7,
+      count(distinct visitor_id) filter (where created_at >= now() - interval '30 days') as unique_30,
+      count(distinct visitor_id)                                                        as unique_all_time
+    from page_views
+  `);
+  return {
+    today: Number(row?.today ?? 0),
+    last7: Number(row?.last7 ?? 0),
+    last30: Number(row?.last30 ?? 0),
+    allTime: Number(row?.all_time ?? 0),
+    uniqueToday: Number(row?.unique_today ?? 0),
+    unique7: Number(row?.unique_7 ?? 0),
+    unique30: Number(row?.unique_30 ?? 0),
+    uniqueAllTime: Number(row?.unique_all_time ?? 0),
+  };
+}
+
+export async function getDailyViewCounts(days: number): Promise<{ date: string; count: number }[]> {
+  const rows = await query<{ date: string; count: string }>(`
+    select d::date::text as date, count(pv.id)::int as count
+    from generate_series((current_date - ($1 || ' days')::interval)::date, current_date, interval '1 day') d
+    left join page_views pv on date_trunc('day', pv.created_at) = d
+    group by d
+    order by d
+  `, [days - 1]);
+  return rows.map(r => ({ date: r.date, count: Number(r.count) }));
+}
+
+export function getTopPaths(days: number, limit: number): Promise<{ path: string; count: number }[]> {
+  return query<{ path: string; count: number }>(`
+    select path, count(*)::int as count
+    from page_views
+    where created_at >= now() - ($1 || ' days')::interval
+    group by path
+    order by count desc
+    limit $2
+  `, [days, limit]);
+}
