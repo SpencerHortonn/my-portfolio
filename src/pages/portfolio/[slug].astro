@@ -36,9 +36,15 @@ const descriptionParagraphs = item.description.split(/\n\s*\n/).map(p => p.trim(
     {item.caption && <p class="field-note inline-block reveal reveal-d1">{item.caption}</p>}
   </section>
 
-  <!-- Cover media -->
-  <section class="max-w-6xl mx-auto px-6 mb-12 reveal">
-    {item.type === 'video' && item.embed_url ? (
+  <!-- Video, if there is one -->
+  {item.video_file ? (
+    <section class="max-w-6xl mx-auto px-6 mb-12 reveal">
+      <div class="aspect-video w-full overflow-hidden bg-black">
+        <video src={item.video_file} controls preload="metadata" class="w-full h-full"></video>
+      </div>
+    </section>
+  ) : item.embed_url ? (
+    <section class="max-w-6xl mx-auto px-6 mb-12 reveal">
       <div class="aspect-video w-full overflow-hidden bg-black">
         <iframe
           src={item.embed_url}
@@ -49,12 +55,14 @@ const descriptionParagraphs = item.description.split(/\n\s*\n/).map(p => p.trim(
           title={item.title}
         ></iframe>
       </div>
-    ) : (
+    </section>
+  ) : item.images.length === 0 && (
+    <section class="max-w-6xl mx-auto px-6 mb-12 reveal">
       <div class="aspect-video w-full overflow-hidden bg-f-paper-warm">
         <img src={item.full_url || item.thumbnail} alt={item.title} class="w-full h-full object-cover" loading="lazy" />
       </div>
-    )}
-  </section>
+    </section>
+  )}
 
   <!-- What I delivered -->
   {descriptionParagraphs.length > 0 && (
@@ -68,8 +76,8 @@ const descriptionParagraphs = item.description.split(/\n\s*\n/).map(p => p.trim(
     </section>
   )}
 
-  <!-- Gallery (for gallery-type case studies) -->
-  {item.type === 'gallery' && item.images.length > 0 && (
+  <!-- Photo gallery — can appear alongside the video above -->
+  {item.images.length > 0 && (
     <section class="max-w-6xl mx-auto px-6 mb-16">
       <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
         {item.images.map(src => (

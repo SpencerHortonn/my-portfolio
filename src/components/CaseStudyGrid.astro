@@ -5,11 +5,14 @@ interface Props {
 }
 const { items } = Astro.props;
 
-const typeLabel: Record<PortfolioItem['type'], string> = {
-  video: 'Film',
-  photo: 'Photo',
-  gallery: 'Photos',
-};
+function mediaLabel(item: PortfolioItem): string {
+  const hasVideo = Boolean(item.video_file || item.embed_url);
+  const hasPhotos = item.images.length > 0;
+  if (hasVideo && hasPhotos) return 'Film + Photos';
+  if (hasVideo) return 'Film';
+  if (hasPhotos) return 'Photos';
+  return 'Photo';
+}
 ---
 
 <div class="grid grid-cols-2">
@@ -33,7 +36,7 @@ const typeLabel: Record<PortfolioItem['type'], string> = {
           {item.client_name || 'Personal'}
         </p>
         <p class="font-sans text-[10px] md:text-xs tracking-[0.15em] uppercase text-white/60 mt-0.5">
-          {typeLabel[item.type]}
+          {mediaLabel(item)}
         </p>
       </div>
     </a>

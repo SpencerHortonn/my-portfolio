@@ -55,43 +55,42 @@ const editing = editId ? await getPortfolioItem(Number(editId)) : null;
       </div>
 
       <div>
-        <label class="admin-label" for="type">Type</label>
-        <select class="admin-select" id="type" name="type">
-          {['video', 'photo', 'gallery'].map(t => (
-            <option value={t} selected={editing?.type === t}>{t}</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label class="admin-label" for="orientation">Orientation</label>
-        <select class="admin-select" id="orientation" name="orientation">
-          {['landscape', 'portrait'].map(o => (
-            <option value={o} selected={editing?.orientation === o}>{o}</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label class="admin-label" for="thumbnail">Thumbnail URL</label>
+        <label class="admin-label" for="thumbnail">Grid tile image URL</label>
         <input class="admin-input" id="thumbnail" name="thumbnail" value={editing?.thumbnail ?? ''} placeholder="/some-image.jpg or https://..." />
       </div>
       <div>
-        <label class="admin-label" for="thumbnail_file">...or upload a thumbnail</label>
+        <label class="admin-label" for="thumbnail_file">...or upload a tile image</label>
         <input class="admin-input" id="thumbnail_file" name="thumbnail_file" type="file" accept="image/*" data-blob-folder="portfolio" />
       </div>
 
+      <div class="md:col-span-2 border-t border-f-border pt-5 mt-2">
+        <p class="font-sans text-xs tracking-[0.15em] uppercase text-f-gray mb-1">Video (optional)</p>
+        <p class="font-sans text-xs text-f-gray/70 mb-4">Paste a YouTube/Vimeo embed, or upload a video file directly (no external branding — uses more of your storage/bandwidth).</p>
+      </div>
+
       <div>
-        <label class="admin-label" for="embed_url">Video embed URL (YouTube/Vimeo)</label>
+        <label class="admin-label" for="embed_url">YouTube/Vimeo embed URL</label>
         <input class="admin-input" id="embed_url" name="embed_url" value={editing?.embed_url ?? ''} placeholder="https://www.youtube.com/embed/..." />
       </div>
       <div>
-        <label class="admin-label" for="full_url">Full-res photo URL</label>
+        <label class="admin-label" for="video_file_file">...or upload a video file</label>
+        <input class="admin-input" id="video_file_file" name="video_file_file" type="file" accept="video/*" data-blob-folder="portfolio-videos" />
+        <input type="hidden" name="video_file" value={editing?.video_file ?? ''} />
+        {editing?.video_file && <p class="font-sans text-xs text-f-gray mt-1">Current video uploaded ✓</p>}
+      </div>
+
+      <div class="md:col-span-2 border-t border-f-border pt-5 mt-2">
+        <p class="font-sans text-xs tracking-[0.15em] uppercase text-f-gray mb-1">Photos (optional)</p>
+        <p class="font-sans text-xs text-f-gray/70 mb-4">Can be used together with a video above — show the finished shots, behind-the-scenes, planning, whatever proves the range of the project.</p>
+      </div>
+
+      <div>
+        <label class="admin-label" for="full_url">Full-res single photo URL (if there's no video and just one hero photo)</label>
         <input class="admin-input" id="full_url" name="full_url" value={editing?.full_url ?? ''} />
       </div>
 
       <div class="md:col-span-2">
-        <label class="admin-label" for="images">Gallery images (one URL per line — only used when type is "gallery")</label>
+        <label class="admin-label" for="images">Photo gallery (one URL per line)</label>
         <textarea class="admin-textarea" id="images" name="images" rows="4">{(editing?.images ?? []).join('\n')}</textarea>
       </div>
 
@@ -116,7 +115,10 @@ const editing = editId ? await getPortfolioItem(Number(editId)) : null;
         <div class="flex-1 min-w-0">
           <p class="font-serif text-base text-f-ink-deep truncate">{item.title}</p>
           <p class="font-sans text-xs text-f-gray">
-            {item.client_name || 'Personal'} · {item.type} · {item.orientation} · {item.published ? 'published' : 'hidden'}
+            {item.client_name || 'Personal'}
+            {(item.video_file || item.embed_url) && ' · video'}
+            {item.images.length > 0 && ' · photos'}
+            {' · '}{item.published ? 'published' : 'hidden'}
           </p>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0">

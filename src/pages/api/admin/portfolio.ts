@@ -58,19 +58,31 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     clientLogo = await uploadFile(clientLogoFile, 'portfolio-logos');
   }
 
+  let videoFile = String(form.get('video_file') || '');
+  const videoFileUpload = form.get('video_file_file');
+  if (videoFileUpload instanceof File && videoFileUpload.size > 0) {
+    videoFile = await uploadFile(videoFileUpload, 'portfolio-videos');
+  }
+
   let slug = String(form.get('slug') || '').trim();
   if (!slug) slug = slugify(title);
+
+  const embedUrl = String(form.get('embed_url') || '');
+  const images = parseLines(String(form.get('images') || ''));
+  // `type` no longer drives the UI — it's just derived from what's actually
+  // filled in, kept around to satisfy the not-null column.
+  const type: PortfolioItem['type'] = (videoFile || embedUrl) ? 'video' : images.length > 0 ? 'gallery' : 'photo';
 
   const item: Omit<PortfolioItem, 'id' | 'created_at'> = {
     title,
     caption: String(form.get('caption') || ''),
-    type: (String(form.get('type') || 'photo')) as PortfolioItem['type'],
-    orientation: (String(form.get('orientation') || 'landscape')) as PortfolioItem['orientation'],
+    type,
+    orientation: 'landscape',
     thumbnail,
     full_url: String(form.get('full_url') || ''),
-    embed_url: String(form.get('embed_url') || ''),
-    video_file: String(form.get('video_file') || ''),
-    images: parseLines(String(form.get('images') || '')),
+    embed_url: embedUrl,
+    video_file: videoFile,
+    images,
     sort_order: Number(form.get('sort_order') || 0),
     published: form.get('published') === 'on',
     slug,
