@@ -159,25 +159,16 @@ const isHome = path === '/';
       border-bottom-color: rgba(191, 179, 156, 0.6);
     }
 
-    /* ── Home page — nav floats over the hero video/image ── */
+    /* ── Home page — nav floats over the hero video/image ──
+       Text stays the same dark color as every other page; only the
+       background is a lighter, more transparent gradient so the video
+       shows through while text keeps enough contrast to read. */
     .film-nav--hero {
-      background: linear-gradient(to bottom, rgba(10,9,7,0.6) 0%, rgba(10,9,7,0.22) 65%, transparent 100%);
+      background: linear-gradient(to bottom, rgba(232,223,208,0.65) 0%, rgba(232,223,208,0.3) 55%, transparent 100%);
       border-bottom-color: transparent;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
     }
-    .film-nav--hero .film-slate { color: rgba(255,255,255,0.55); }
-    .film-nav--hero .film-slate .tag { color: rgba(255,255,255,0.8); }
-    .film-nav--hero .film-slate .dot { background: #fff; }
-    .film-nav--hero .film-slate .tc { color: rgba(255,255,255,0.92); }
-    .film-nav--hero .film-brand .name { color: #fff; }
-    .film-nav--hero .film-brand .role { color: rgba(255,255,255,0.75); }
-    .film-nav--hero .film-links a { color: rgba(255,255,255,0.8); }
-    .film-nav--hero .film-links a::before { color: rgba(255,255,255,0.55); }
-    .film-nav--hero .film-links a::after { background: #fff; }
-    .film-nav--hero .film-links a:hover,
-    .film-nav--hero .film-links a.is-active { color: #fff; }
-    .film-nav--hero #mobile-menu-btn { color: #fff; }
     .film-nav--hero .rail { display: none; }
 
     /* Once scrolled past the hero, fall back to the normal solid nav */
@@ -187,23 +178,13 @@ const isHome = path === '/';
       backdrop-filter: blur(14px) saturate(1.1);
       -webkit-backdrop-filter: blur(14px) saturate(1.1);
     }
-    .film-nav--hero.scrolled .film-slate { color: #9A9186; }
-    .film-nav--hero.scrolled .film-slate .tag { color: #6B6357; }
-    .film-nav--hero.scrolled .film-slate .dot { background: #1F1C18; }
-    .film-nav--hero.scrolled .film-slate .tc { color: #1F1C18; }
-    .film-nav--hero.scrolled .film-brand .name { color: #1F1C18; }
-    .film-nav--hero.scrolled .film-brand .role { color: #6B6357; }
-    .film-nav--hero.scrolled .film-links a { color: #6B6357; }
-    .film-nav--hero.scrolled .film-links a::before { color: #9A9186; }
-    .film-nav--hero.scrolled .film-links a::after { background: #1F1C18; }
-    .film-nav--hero.scrolled .film-links a:hover,
-    .film-nav--hero.scrolled .film-links a.is-active { color: #1F1C18; }
-    .film-nav--hero.scrolled #mobile-menu-btn { color: #1F1C18; }
     .film-nav--hero.scrolled .rail { display: flex; }
 
-    /* Slate metadata row */
+    /* Slate metadata row — desktop only, matches the "hidden md:flex" on the element */
+    @media (min-width: 768px) {
+      .film-nav .film-slate { display: flex; }
+    }
     .film-nav .film-slate {
-      display: flex;
       justify-content: space-between;
       align-items: center;
       font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -282,14 +263,15 @@ const isHome = path === '/';
       .film-nav .film-brand .role { display: none; }
     }
 
-    /* Reel dial (center) */
-    /* Nav links (center) */
+    /* Nav links (center) — desktop only, matches the "hidden md:flex" on the element */
+    @media (min-width: 768px) {
+      .film-nav .film-links { display: flex; }
+    }
     .film-nav .film-links {
       justify-self: center;
       list-style: none;
       margin: 0;
       padding: 0;
-      display: flex;
       justify-content: center;
       align-items: baseline;
       gap: 32px;
@@ -332,9 +314,11 @@ const isHome = path === '/';
     .film-nav .film-links a:hover::after,
     .film-nav .film-links a.is-active::after { transform: scaleX(1); }
 
-    /* Sprocket rail */
+    /* Sprocket rail — desktop only, matches the "hidden md:flex" on the element */
+    @media (min-width: 768px) {
+      .film-nav .rail { display: flex; }
+    }
     .film-nav .rail {
-      display: flex;
       align-items: stretch;
       height: 16px;
       border-top: 1px solid #BFB39C;

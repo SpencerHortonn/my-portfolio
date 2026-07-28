@@ -12,21 +12,21 @@ const uid = `tc-${Math.random().toString(36).slice(2, 9)}`;
 ---
 
 {testimonials.length > 0 && (
-  <section class="testimonial-carousel py-16 md:py-24 border-y border-f-border/40" aria-label="Testimonials" data-uid={uid}>
-    <div class="max-w-3xl mx-auto px-6">
-      <div class="relative min-h-[200px] flex items-center">
+  <section class="testimonial-carousel py-8 md:py-10 border-y border-f-border/40" aria-label="Testimonials" data-uid={uid}>
+    <div class="max-w-2xl mx-auto px-6">
+      <div class="relative min-h-[100px] md:min-h-[90px] flex items-center">
         {testimonials.map((t, i) => (
           <div class={`tc-slide ${i === 0 ? 'is-active' : ''} absolute inset-0 flex flex-col items-center text-center reveal`} data-index={i}>
-            <p class="font-serif italic text-xl md:text-2xl font-light text-f-ink leading-snug mb-6">
+            <p class="font-serif italic text-base md:text-lg font-light text-f-ink leading-snug mb-3">
               &ldquo;{t.quote}&rdquo;
             </p>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5">
               {t.photo && (
-                <img src={t.photo} alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy" />
+                <img src={t.photo} alt="" class="w-7 h-7 rounded-full object-cover" loading="lazy" />
               )}
               <div class="text-left">
-                <p class="font-sans text-sm text-f-ink">{t.author_name}</p>
-                {t.author_role && <p class="font-sans text-xs text-f-gray">{t.author_role}</p>}
+                <p class="font-sans text-xs text-f-ink">{t.author_name}</p>
+                {t.author_role && <p class="font-sans text-[11px] text-f-gray">{t.author_role}</p>}
               </div>
             </div>
           </div>
@@ -34,7 +34,7 @@ const uid = `tc-${Math.random().toString(36).slice(2, 9)}`;
       </div>
 
       {testimonials.length > 1 && (
-        <div class="flex items-center justify-center gap-2 mt-8">
+        <div class="flex items-center justify-center gap-2 mt-4">
           {testimonials.map((_, i) => (
             <button
               type="button"
