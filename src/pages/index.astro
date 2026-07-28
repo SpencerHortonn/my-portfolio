@@ -15,7 +15,7 @@ const settings = { ...DEFAULT_SETTINGS, ...s };
 
 const clients = portfolioItems
   .filter(item => item.client_logo)
-  .map(item => ({ name: item.client_name || item.title, logo: item.client_logo }));
+  .map(item => ({ name: item.client_name || item.title, logo: item.client_logo, slug: item.slug }));
 ---
 
 <Layout>

@@ -15,11 +15,11 @@ function mediaLabel(item: PortfolioItem): string {
 }
 ---
 
-<div class="grid grid-cols-2">
+<div class="grid grid-cols-2 md:grid-cols-3">
   {items.map(item => (
     <a
       href={`/portfolio/${item.slug}`}
-      class="group relative block aspect-square md:aspect-[4/3] overflow-hidden bg-f-paper-warm"
+      class="group relative block aspect-square overflow-hidden bg-f-paper-warm"
       aria-label={`View case study: ${item.client_name || 'Personal project'} — ${item.title}`}
     >
       <img

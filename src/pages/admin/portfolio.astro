@@ -1,11 +1,14 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { getPortfolioItem, listPortfolioItems } from '../../lib/db';
+import { getPortfolioItem, getSetting, listPortfolioItems } from '../../lib/db';
+import { DEFAULT_SETTINGS } from '../../lib/defaultSettings';
 
 const items = await listPortfolioItems();
+const showreel = await getSetting('showreel', DEFAULT_SETTINGS.showreel);
 
 const editId = Astro.url.searchParams.get('edit');
 const editing = editId ? await getPortfolioItem(Number(editId)) : null;
+const saved = Astro.url.searchParams.get('saved') === '1';
 ---
 
 <AdminLayout title="Portfolio">
@@ -13,6 +16,38 @@ const editing = editId ? await getPortfolioItem(Number(editId)) : null;
     <h1 class="font-serif text-3xl font-light text-f-ink-deep">Portfolio</h1>
     <a href="/portfolio" target="_blank" class="font-sans text-xs text-f-gray hover:text-f-ink underline">View live page →</a>
   </div>
+
+  {saved && (
+    <p class="font-sans text-sm text-green-800 bg-green-50 border border-green-800/30 px-4 py-2 mb-6 inline-block">
+      Saved.
+    </p>
+  )}
+
+  <!-- ── Showreel ── -->
+  <details class="border border-f-border bg-f-paper-warm p-6 mb-10" open={showreel.hidden || Boolean(showreel.videoUrl || showreel.embedUrl)}>
+    <summary class="font-serif text-xl text-f-ink-deep cursor-pointer">Showreel</summary>
+    <form method="POST" action="/api/admin/showreel" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+      <label class="md:col-span-2 flex items-center gap-2 font-sans text-sm text-f-gray">
+        <input type="checkbox" name="showreel_hidden" checked={showreel.hidden} />
+        Hide the showreel section on the Portfolio page entirely
+      </label>
+
+      <div>
+        <label class="admin-label" for="showreel_embed_url">YouTube/Vimeo embed URL</label>
+        <input class="admin-input" id="showreel_embed_url" name="showreel_embed_url" value={showreel.embedUrl} placeholder="https://www.youtube.com/embed/..." />
+      </div>
+      <div>
+        <label class="admin-label" for="showreel_video_file">...or upload a video file</label>
+        <input class="admin-input" id="showreel_video_file" name="showreel_video_file" type="file" accept="video/*" data-blob-folder="showreel" data-url-field="showreel_video_url" />
+        <input type="hidden" name="showreel_video_url" value={showreel.videoUrl} />
+        {showreel.videoUrl && <p class="font-sans text-xs text-f-gray mt-1">Current video uploaded ✓</p>}
+      </div>
+
+      <div>
+        <button type="submit" class="admin-btn">Save showreel</button>
+      </div>
+    </form>
+  </details>
 
   <!-- ── Add / edit form ── -->
   <section class="border border-f-border bg-f-paper-warm p-6 mb-10">

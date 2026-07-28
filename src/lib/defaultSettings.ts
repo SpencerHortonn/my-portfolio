@@ -48,6 +48,12 @@ export const DEFAULT_SETTINGS = {
     shop: true,
     workWithMe: true,
   },
+
+  showreel: {
+    hidden: false,
+    videoUrl: '',
+    embedUrl: '',
+  },
 };
 
 export type SiteSettings = typeof DEFAULT_SETTINGS;

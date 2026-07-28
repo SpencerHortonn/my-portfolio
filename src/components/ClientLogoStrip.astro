@@ -2,6 +2,7 @@
 interface ClientLogo {
   name: string;
   logo: string;
+  slug: string;
 }
 interface Props {
   clients: ClientLogo[];
@@ -15,15 +16,17 @@ const { clients } = Astro.props;
       <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-gray mb-8 text-center reveal">
         Past clients
       </p>
-      <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 reveal reveal-d1">
+      <div class="flex flex-wrap items-center justify-center gap-x-14 gap-y-10 reveal reveal-d1">
         {clients.map(client => (
-          <img
-            src={client.logo}
-            alt={client.name}
-            title={client.name}
-            class="h-8 md:h-10 object-contain opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
-            loading="lazy"
-          />
+          <a href={`/portfolio/${client.slug}`} aria-label={`View case study: ${client.name}`}>
+            <img
+              src={client.logo}
+              alt={client.name}
+              title={client.name}
+              class="h-12 md:h-16 object-contain opacity-70 hover:opacity-100 transition-opacity"
+              loading="lazy"
+            />
+          </a>
         ))}
       </div>
     </div>

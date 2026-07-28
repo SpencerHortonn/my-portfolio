@@ -20,20 +20,39 @@ const settings = { ...DEFAULT_SETTINGS, ...s };
 >
   <div class="pt-28 md:pt-36"></div>
 
-  <!-- ── Showreel — placeholder until the real reel is cut ── -->
-  <section class="max-w-6xl mx-auto px-6 mb-8 md:mb-16">
-    <div class="reveal relative aspect-video w-full overflow-hidden flex items-center justify-center" style="background: #1F1B16;">
-      <div class="absolute inset-0 opacity-30" style="background: radial-gradient(ellipse at 50% 40%, rgba(232,223,208,0.12), transparent 70%);" aria-hidden="true"></div>
-      <div class="relative text-center px-6">
-        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" class="mx-auto mb-5 opacity-60">
-          <circle cx="26" cy="26" r="25" stroke="#E8DFD0" stroke-width="1.2"/>
-          <polygon points="21,17 37,26 21,35" fill="#E8DFD0"/>
-        </svg>
-        <p class="font-serif italic text-2xl md:text-3xl text-f-white mb-2">Showreel coming soon</p>
-        <p class="font-sans text-xs tracking-[0.2em] uppercase text-f-white/40">Specific projects below</p>
-      </div>
-    </div>
-  </section>
+  <!-- ── Showreel ── -->
+  {!settings.showreel.hidden && (
+    <section class="max-w-6xl mx-auto px-6 mb-8 md:mb-16">
+      {settings.showreel.videoUrl ? (
+        <div class="reveal aspect-video w-full overflow-hidden bg-black">
+          <video src={settings.showreel.videoUrl} controls preload="metadata" class="w-full h-full"></video>
+        </div>
+      ) : settings.showreel.embedUrl ? (
+        <div class="reveal aspect-video w-full overflow-hidden bg-black">
+          <iframe
+            src={settings.showreel.embedUrl}
+            class="w-full h-full"
+            frameborder="0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+            title="Showreel"
+          ></iframe>
+        </div>
+      ) : (
+        <div class="reveal relative aspect-video w-full overflow-hidden flex items-center justify-center" style="background: #1F1B16;">
+          <div class="absolute inset-0 opacity-30" style="background: radial-gradient(ellipse at 50% 40%, rgba(232,223,208,0.12), transparent 70%);" aria-hidden="true"></div>
+          <div class="relative text-center px-6">
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none" class="mx-auto mb-5 opacity-60">
+              <circle cx="26" cy="26" r="25" stroke="#E8DFD0" stroke-width="1.2"/>
+              <polygon points="21,17 37,26 21,35" fill="#E8DFD0"/>
+            </svg>
+            <p class="font-serif italic text-2xl md:text-3xl text-f-white mb-2">Showreel coming soon</p>
+            <p class="font-sans text-xs tracking-[0.2em] uppercase text-f-white/40">Specific projects below</p>
+          </div>
+        </div>
+      )}
+    </section>
+  )}
 
   <TestimonialsCarousel testimonials={testimonials} />
 

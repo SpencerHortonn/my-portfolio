@@ -16,6 +16,7 @@ const {
 const navVisibility = await getSetting('nav_visibility', DEFAULT_SETTINGS.nav_visibility);
 
 const allNavItems = [
+  { href: '/',              label: 'Home',         show: true },
   { href: '/about',         label: 'About',        show: navVisibility.about },
   { href: '/portfolio',     label: 'Portfolio',     show: navVisibility.portfolio },
   { href: '/shop',          label: 'Shop',          show: navVisibility.shop },
@@ -24,6 +25,7 @@ const allNavItems = [
 const navItems = allNavItems.filter(item => item.show);
 const path = Astro.url.pathname;
 const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+const isHome = path === '/';
 ---
 
 <!DOCTYPE html>
@@ -81,7 +83,7 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
   <canvas id="scratch-canvas" aria-hidden="true"></canvas>
 
   <!-- ── Navigation ── -->
-  <nav id="main-nav" class="film-nav">
+  <nav id="main-nav" class:list={['film-nav', { 'film-nav--hero': isHome }]}>
     <!-- Metadata slate row -->
     <div class="film-slate hidden md:flex">
       <span class="tag"><span class="dot"></span>REC &middot; Tyler, TX</span>
@@ -156,6 +158,48 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
       background: rgba(232, 223, 208, 0.96);
       border-bottom-color: rgba(191, 179, 156, 0.6);
     }
+
+    /* ── Home page — nav floats over the hero video/image ── */
+    .film-nav--hero {
+      background: linear-gradient(to bottom, rgba(10,9,7,0.6) 0%, rgba(10,9,7,0.22) 65%, transparent 100%);
+      border-bottom-color: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    .film-nav--hero .film-slate { color: rgba(255,255,255,0.55); }
+    .film-nav--hero .film-slate .tag { color: rgba(255,255,255,0.8); }
+    .film-nav--hero .film-slate .dot { background: #fff; }
+    .film-nav--hero .film-slate .tc { color: rgba(255,255,255,0.92); }
+    .film-nav--hero .film-brand .name { color: #fff; }
+    .film-nav--hero .film-brand .role { color: rgba(255,255,255,0.75); }
+    .film-nav--hero .film-links a { color: rgba(255,255,255,0.8); }
+    .film-nav--hero .film-links a::before { color: rgba(255,255,255,0.55); }
+    .film-nav--hero .film-links a::after { background: #fff; }
+    .film-nav--hero .film-links a:hover,
+    .film-nav--hero .film-links a.is-active { color: #fff; }
+    .film-nav--hero #mobile-menu-btn { color: #fff; }
+    .film-nav--hero .rail { display: none; }
+
+    /* Once scrolled past the hero, fall back to the normal solid nav */
+    .film-nav--hero.scrolled {
+      background: rgba(232, 223, 208, 0.96);
+      border-bottom-color: rgba(191, 179, 156, 0.6);
+      backdrop-filter: blur(14px) saturate(1.1);
+      -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    }
+    .film-nav--hero.scrolled .film-slate { color: #9A9186; }
+    .film-nav--hero.scrolled .film-slate .tag { color: #6B6357; }
+    .film-nav--hero.scrolled .film-slate .dot { background: #1F1C18; }
+    .film-nav--hero.scrolled .film-slate .tc { color: #1F1C18; }
+    .film-nav--hero.scrolled .film-brand .name { color: #1F1C18; }
+    .film-nav--hero.scrolled .film-brand .role { color: #6B6357; }
+    .film-nav--hero.scrolled .film-links a { color: #6B6357; }
+    .film-nav--hero.scrolled .film-links a::before { color: #9A9186; }
+    .film-nav--hero.scrolled .film-links a::after { background: #1F1C18; }
+    .film-nav--hero.scrolled .film-links a:hover,
+    .film-nav--hero.scrolled .film-links a.is-active { color: #1F1C18; }
+    .film-nav--hero.scrolled #mobile-menu-btn { color: #1F1C18; }
+    .film-nav--hero.scrolled .rail { display: flex; }
 
     /* Slate metadata row */
     .film-nav .film-slate {
@@ -570,9 +614,14 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
     });
 
     // ── Nav scrolled ──
+    // On the home page the nav floats transparently over the full-height
+    // hero video — keep it that way for the whole hero, not just the first
+    // 60px, and only switch to the solid nav once past it.
     const nav = document.getElementById('main-nav');
+    const isHeroNav = nav?.classList.contains('film-nav--hero');
     window.addEventListener('scroll', () => {
-      nav?.classList.toggle('scrolled', window.scrollY > 60);
+      const threshold = isHeroNav ? window.innerHeight - 80 : 60;
+      nav?.classList.toggle('scrolled', window.scrollY > threshold);
     }, { passive: true });
 
     // ── Mobile menu ──

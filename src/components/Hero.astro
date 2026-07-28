@@ -6,6 +6,13 @@ interface Props {
   mediaUrl: string;
 }
 const { name, tagline, mediaType, mediaUrl } = Astro.props;
+
+function guessVideoType(url: string): string {
+  const ext = url.split('?')[0].split('.').pop()?.toLowerCase();
+  if (ext === 'webm') return 'video/webm';
+  if (ext === 'mov') return 'video/quicktime';
+  return 'video/mp4';
+}
 ---
 
 <section
@@ -16,14 +23,16 @@ const { name, tagline, mediaType, mediaUrl } = Astro.props;
   <!-- Background — video or Ken-Burns image -->
   {mediaType === 'video' && mediaUrl ? (
     <video
+      id="hero-video"
       class="absolute inset-0 w-full h-full object-cover"
       autoplay
       muted
       loop
       playsinline
+      preload="auto"
       aria-hidden="true"
     >
-      <source src={mediaUrl} />
+      <source src={mediaUrl} type={guessVideoType(mediaUrl)} />
     </video>
   ) : (
     <div
@@ -187,6 +196,20 @@ const { name, tagline, mediaType, mediaUrl } = Astro.props;
 </style>
 
 <script>
+  // Force playback — some browsers only honor autoplay reliably once the
+  // `muted` property (not just the attribute) is set via JS, and silently
+  // reject the initial attempt otherwise.
+  const heroVideo = document.getElementById('hero-video') as HTMLVideoElement | null;
+  if (heroVideo) {
+    heroVideo.muted = true;
+    heroVideo.play().catch(() => {
+      // Autoplay blocked — start it on the first user interaction instead.
+      const resume = () => { heroVideo.play().catch(() => {}); };
+      document.addEventListener('click', resume, { once: true });
+      document.addEventListener('scroll', resume, { once: true, passive: true });
+    });
+  }
+
   // Typewriter reveal — letter-by-letter, 300ms total
   const nameEl = document.getElementById('hero-name');
   if (nameEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
