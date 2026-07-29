@@ -415,15 +415,29 @@ export interface UgcItem {
   created_at: string;
 }
 
-export function listUgcItems(opts: { publishedOnly?: boolean } = {}): Promise<UgcItem[]> {
+// Falls back to an empty list on error — most commonly because the
+// ugc_items table hasn't been created yet via the migration. Without this,
+// both the public /ugc page and the admin dashboard (which shows a count)
+// would 500 entirely until the migration is run.
+export async function listUgcItems(opts: { publishedOnly?: boolean } = {}): Promise<UgcItem[]> {
   const where = opts.publishedOnly ? 'where published = true' : '';
-  return query<UgcItem>(
-    `select * from ugc_items ${where} order by sort_order asc, id asc`
-  );
+  try {
+    return await query<UgcItem>(
+      `select * from ugc_items ${where} order by sort_order asc, id asc`
+    );
+  } catch (err) {
+    console.error('listUgcItems failed (has the ugc_items migration been run?):', err);
+    return [];
+  }
 }
 
-export function getUgcItem(id: number): Promise<UgcItem | null> {
-  return queryOne<UgcItem>('select * from ugc_items where id = $1', [id]);
+export async function getUgcItem(id: number): Promise<UgcItem | null> {
+  try {
+    return await queryOne<UgcItem>('select * from ugc_items where id = $1', [id]);
+  } catch (err) {
+    console.error('getUgcItem failed (has the ugc_items migration been run?):', err);
+    return null;
+  }
 }
 
 export function createUgcItem(u: Omit<UgcItem, 'id' | 'created_at'>): Promise<UgcItem> {
