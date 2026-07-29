@@ -14,6 +14,9 @@ const {
 } = Astro.props;
 
 const navVisibility = await getSetting('nav_visibility', DEFAULT_SETTINGS.nav_visibility);
+const siteImage = await getSetting('site_image', DEFAULT_SETTINGS.site_image);
+const absoluteImageUrl = new URL(siteImage, Astro.site).toString();
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
 
 const allNavItems = [
   { href: '/',              label: 'Home',         show: true },
@@ -35,7 +38,25 @@ const isHome = path === '/';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content={description} />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="canonical" href={canonicalUrl} />
+
+  <!-- Favicon — a real photo of Spencer, editable from /admin/settings -->
+  <link rel="icon" href={siteImage} />
+  <link rel="apple-touch-icon" href={siteImage} />
+
+  <!-- Open Graph / link-preview image — without this, apps like iMessage
+       and Slack guess by scraping the page for any image, which was
+       picking up a client's logo instead of a photo of Spencer. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={absoluteImageUrl} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={absoluteImageUrl} />
+
   <title>{title}</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />

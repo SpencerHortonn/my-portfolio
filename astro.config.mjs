@@ -4,7 +4,7 @@ import vercel from '@astrojs/vercel/serverless';
 
 export default defineConfig({
   integrations: [tailwind()],
-  site: 'https://spencerlane.com',
+  site: 'https://www.spencerlane.co',
   output: 'server',
   adapter: vercel(),
 });

@@ -13,6 +13,11 @@ export const DEFAULT_SETTINGS = {
 
   about_photo: '/image%20for%20about%20me.JPG',
 
+  // Used for the browser tab icon and the image shown when a link to the
+  // site is shared/pasted anywhere (iMessage, Slack, Twitter, etc.) — a
+  // real photo of Spencer, not any client's logo.
+  site_image: '/image%20for%20about%20me.JPG',
+
   contact: {
     email: 'spencerhortonmedia@gmail.com',
     phone: '(903) 521-6471',

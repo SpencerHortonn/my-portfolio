@@ -24,6 +24,24 @@ const saved = Astro.url.searchParams.get('saved') === '1';
   <form method="POST" action="/api/admin/settings" enctype="multipart/form-data" class="flex flex-col gap-10">
 
     <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
+      <legend class="font-serif text-lg text-f-ink-deep px-2">Branding</legend>
+      <p class="font-sans text-xs text-f-gray -mt-2">
+        This photo is used as the browser tab icon and as the preview image when anyone shares a link to the site (iMessage, Slack, Twitter, etc.) — use a real photo of you, not a client logo.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+        <div>
+          <label class="admin-label" for="site_image">Site image URL</label>
+          <input class="admin-input" id="site_image" name="site_image" value={settings.site_image} />
+        </div>
+        <div>
+          <label class="admin-label" for="site_image_file">...or upload a photo</label>
+          <input class="admin-input" id="site_image_file" name="site_image_file" type="file" accept="image/*" data-blob-folder="branding" data-url-field="site_image" />
+        </div>
+      </div>
+      {settings.site_image && <img src={settings.site_image} alt="Current site image" class="w-20 h-20 object-cover rounded-full border border-f-border" />}
+    </fieldset>
+
+    <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
       <legend class="font-serif text-lg text-f-ink-deep px-2">Home / hero</legend>
       <div>
         <label class="admin-label" for="site_name">Site name</label>

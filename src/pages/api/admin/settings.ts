@@ -24,8 +24,15 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     aboutPhoto = await uploadFile(aboutPhotoFile, 'about');
   }
 
+  let siteImage = f('site_image');
+  const siteImageFile = form.get('site_image_file');
+  if (siteImageFile instanceof File && siteImageFile.size > 0) {
+    siteImage = await uploadFile(siteImageFile, 'branding');
+  }
+
   await Promise.all([
     setSetting('site_name', f('site_name')),
+    setSetting('site_image', siteImage),
     setSetting('hero_tagline', f('hero_tagline')),
     setSetting('hero_media', {
       type: f('hero_media_type') === 'video' ? 'video' : 'image',
