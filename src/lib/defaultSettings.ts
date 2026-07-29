@@ -47,12 +47,21 @@ export const DEFAULT_SETTINGS = {
     portfolio: true,
     shop: true,
     workWithMe: true,
+    // Off by default — this page is meant to be shared as a direct link
+    // (e.g. to travel brands), not surfaced in the main menu yet.
+    ugc: false,
   },
 
   showreel: {
     hidden: false,
     videoUrl: '',
     embedUrl: '',
+  },
+
+  ugc_page: {
+    headline: 'UGC Content for Brands',
+    intro: "I create authentic, scroll-stopping UGC — real footage, real voice, made for travel and lifestyle brands who want content that actually performs.",
+    contact_note: "Want content like this for your brand? Let's talk.",
   },
 };
 

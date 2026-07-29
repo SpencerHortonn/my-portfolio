@@ -46,7 +46,8 @@ Go to `/admin`, enter the password, and you'll land on the dashboard:
 - **Work With Me** — the intro paragraph and services list shown on `/work-with-me`.
 - **Messages** — contact form submissions (also emailed to you directly via Resend).
 - **Analytics** — self-hosted visitor tracking (no third-party service). Page views + unique visitors for today/7/30 days/all-time, a daily views chart for the last 30 days, and top pages. Tracked via `src/middleware.ts` on every real page request (not admin/API/assets) using a first-party `visitor_id` cookie.
-- **Settings** — hero background (image or video) + tagline, About bio/photo, contact info, socials, and checkboxes for which nav tabs are visible (hiding a tab just removes it from the menu — the page still works via direct link).
+- **UGC** — reels/clips (native video upload or TikTok/Instagram/YouTube embed) shown on `/ugc`, a UGC portfolio page meant to be sent directly to brands. It's hidden from the nav by default — flip it on from Settings whenever you're ready to list it publicly.
+- **Settings** — hero background (image or video) + tagline, About bio/photo, contact info, socials, UGC page headline/intro/contact line, and checkboxes for which nav tabs are visible (hiding a tab just removes it from the menu — the page still works via direct link).
 
 Every save takes effect on the live site immediately — no rebuild or redeploy needed.
 

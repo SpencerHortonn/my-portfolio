@@ -74,8 +74,22 @@ create table if not exists page_views (
   created_at timestamptz not null default now()
 );
 
+create table if not exists ugc_items (
+  id           serial primary key,
+  brand_name   text not null default '',
+  platform     text not null default '',
+  caption      text not null default '',
+  video_file   text not null default '',
+  embed_url    text not null default '',
+  thumbnail    text not null default '',
+  sort_order   integer not null default 0,
+  published    boolean not null default true,
+  created_at   timestamptz not null default now()
+);
+
 create index if not exists idx_portfolio_items_sort on portfolio_items (sort_order, id);
 create index if not exists idx_shop_products_sort on shop_products (sort_order, id);
 create index if not exists idx_testimonials_sort on testimonials (sort_order, id);
 create index if not exists idx_page_views_created on page_views (created_at);
 create index if not exists idx_page_views_path on page_views (path);
+create index if not exists idx_ugc_items_sort on ugc_items (sort_order, id);

@@ -1,0 +1,105 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+import { getSettings, listUgcItems } from '../lib/db';
+import { DEFAULT_SETTINGS } from '../lib/defaultSettings';
+
+const [s, items] = await Promise.all([
+  getSettings(Object.keys(DEFAULT_SETTINGS)),
+  listUgcItems({ publishedOnly: true }),
+]);
+const settings = { ...DEFAULT_SETTINGS, ...s };
+const ugcPage = { ...DEFAULT_SETTINGS.ugc_page, ...settings.ugc_page };
+---
+
+<Layout
+  title="UGC — Spencer Lane"
+  description={ugcPage.intro}
+>
+  <div class="pt-28 md:pt-36"></div>
+
+  <section class="max-w-3xl mx-auto px-6 text-center mb-14 reveal">
+    <p class="font-sans text-xs tracking-[0.25em] uppercase text-f-gray mb-4">Travel &amp; Brand UGC</p>
+    <h1 class="font-serif text-4xl md:text-5xl font-light text-f-ink leading-tight mb-5">
+      {ugcPage.headline}
+    </h1>
+    <p class="font-sans text-base md:text-lg text-f-gray font-light leading-relaxed">
+      {ugcPage.intro}
+    </p>
+  </section>
+
+  {items.length === 0 ? (
+    <section class="max-w-3xl mx-auto px-6 mb-20 text-center reveal">
+      <p class="font-sans text-sm text-f-gray">More clips coming soon.</p>
+    </section>
+  ) : (
+    <section class="max-w-6xl mx-auto px-6 mb-20">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {items.map(item => (
+          <div class="group relative aspect-[9/16] overflow-hidden bg-black reveal">
+            {item.video_file ? (
+              <video
+                src={item.video_file}
+                poster={item.thumbnail || undefined}
+                controls
+                preload="metadata"
+                class="w-full h-full object-cover"
+              ></video>
+            ) : item.embed_url ? (
+              <iframe
+                src={item.embed_url}
+                class="w-full h-full"
+                frameborder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowfullscreen
+                title={item.brand_name || item.caption || 'UGC clip'}
+              ></iframe>
+            ) : (
+              <img
+                src={item.thumbnail}
+                alt={item.caption || item.brand_name}
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+            )}
+            {(item.brand_name || item.platform) && (
+              <div
+                class="absolute inset-x-0 bottom-0 px-3 py-3 pointer-events-none"
+                style="background: linear-gradient(to top, rgba(10,9,7,0.75) 0%, rgba(10,9,7,0.2) 70%, transparent 100%);"
+              >
+                {item.brand_name && (
+                  <p class="font-sans text-xs tracking-[0.1em] uppercase text-white">{item.brand_name}</p>
+                )}
+                {item.platform && (
+                  <p class="font-sans text-[10px] tracking-[0.15em] uppercase text-white/60 mt-0.5">{item.platform}</p>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="max-w-3xl mx-auto px-6 py-16 md:py-20 text-center reveal">
+    {ugcPage.contact_note && (
+      <p class="font-sans text-base md:text-lg text-f-gray font-light mb-6">{ugcPage.contact_note}</p>
+    )}
+    <a
+      href="/work-with-me"
+      class="inline-block px-8 py-4 bg-f-ink text-f-white font-sans text-xs tracking-[0.15em] uppercase hover:bg-f-ink/80 transition-colors"
+    >
+      Work with me
+    </a>
+  </section>
+
+  <Footer
+    siteName={settings.site_name}
+    email={settings.contact.email}
+    phone={settings.contact.phone}
+    phoneTel={settings.contact.phoneTel}
+    tiktok={settings.socials.tiktok}
+    instagram={settings.socials.instagram}
+    youtube={settings.socials.youtube}
+  />
+</Layout>

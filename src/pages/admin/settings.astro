@@ -126,6 +126,29 @@ const saved = Astro.url.searchParams.get('saved') === '1';
           <input type="checkbox" name="nav_work_with_me" checked={settings.nav_visibility.workWithMe} />
           Work With Me
         </label>
+        <label class="flex items-center gap-2 font-sans text-sm text-f-gray">
+          <input type="checkbox" name="nav_ugc" checked={settings.nav_visibility.ugc} />
+          UGC (off by default — share <code>/ugc</code> as a direct link until you're ready to list it)
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="border border-f-border bg-f-paper-warm p-6 flex flex-col gap-5">
+      <legend class="font-serif text-lg text-f-ink-deep px-2">UGC page copy</legend>
+      <p class="font-sans text-xs text-f-gray -mt-2">
+        Shown at the top of the hidden <code>/ugc</code> page. Manage the actual clips at <a href="/admin/ugc" class="underline hover:text-f-ink">/admin/ugc</a>.
+      </p>
+      <div>
+        <label class="admin-label" for="ugc_headline">Headline</label>
+        <input class="admin-input" id="ugc_headline" name="ugc_headline" value={settings.ugc_page.headline} />
+      </div>
+      <div>
+        <label class="admin-label" for="ugc_intro">Intro paragraph</label>
+        <textarea class="admin-textarea" id="ugc_intro" name="ugc_intro" rows="3">{settings.ugc_page.intro}</textarea>
+      </div>
+      <div>
+        <label class="admin-label" for="ugc_contact_note">Contact line (above the CTA button)</label>
+        <input class="admin-input" id="ugc_contact_note" name="ugc_contact_note" value={settings.ugc_page.contact_note} />
       </div>
     </fieldset>
 

@@ -397,3 +397,58 @@ export async function getTopPaths(days: number, limit: number): Promise<{ path: 
     return [];
   }
 }
+
+// ── UGC items ────────────────────────────────────────────────────
+// Reels/clips for the hidden /ugc pitch page — not part of the main
+// portfolio case studies, so they get their own lightweight table.
+
+export interface UgcItem {
+  id: number;
+  brand_name: string;
+  platform: string;
+  caption: string;
+  video_file: string;
+  embed_url: string;
+  thumbnail: string;
+  sort_order: number;
+  published: boolean;
+  created_at: string;
+}
+
+export function listUgcItems(opts: { publishedOnly?: boolean } = {}): Promise<UgcItem[]> {
+  const where = opts.publishedOnly ? 'where published = true' : '';
+  return query<UgcItem>(
+    `select * from ugc_items ${where} order by sort_order asc, id asc`
+  );
+}
+
+export function getUgcItem(id: number): Promise<UgcItem | null> {
+  return queryOne<UgcItem>('select * from ugc_items where id = $1', [id]);
+}
+
+export function createUgcItem(u: Omit<UgcItem, 'id' | 'created_at'>): Promise<UgcItem> {
+  return queryOne<UgcItem>(
+    `insert into ugc_items (brand_name, platform, caption, video_file, embed_url, thumbnail, sort_order, published)
+     values ($1,$2,$3,$4,$5,$6,$7,$8)
+     returning *`,
+    [u.brand_name, u.platform, u.caption, u.video_file, u.embed_url, u.thumbnail, u.sort_order, u.published]
+  ) as Promise<UgcItem>;
+}
+
+export function updateUgcItem(id: number, u: Omit<UgcItem, 'id' | 'created_at'>): Promise<UgcItem> {
+  return queryOne<UgcItem>(
+    `update ugc_items set
+      brand_name=$1, platform=$2, caption=$3, video_file=$4, embed_url=$5, thumbnail=$6, sort_order=$7, published=$8
+     where id=$9
+     returning *`,
+    [u.brand_name, u.platform, u.caption, u.video_file, u.embed_url, u.thumbnail, u.sort_order, u.published, id]
+  ) as Promise<UgcItem>;
+}
+
+export function deleteUgcItem(id: number): Promise<void> {
+  return query('delete from ugc_items where id = $1', [id]).then(() => undefined);
+}
+
+export function setUgcItemOrder(id: number, sortOrder: number): Promise<void> {
+  return query('update ugc_items set sort_order = $1 where id = $2', [sortOrder, id]).then(() => undefined);
+}

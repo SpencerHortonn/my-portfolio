@@ -49,6 +49,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       portfolio: form.get('nav_portfolio') === 'on',
       shop: form.get('nav_shop') === 'on',
       workWithMe: form.get('nav_work_with_me') === 'on',
+      ugc: form.get('nav_ugc') === 'on',
+    }),
+    setSetting('ugc_page', {
+      headline: f('ugc_headline'),
+      intro: f('ugc_intro'),
+      contact_note: f('ugc_contact_note'),
     }),
   ]);
 
